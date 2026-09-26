@@ -1,0 +1,162 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Design idea: a printed timetable you mark up with highlighters.
+  Cool paper and ink for the chrome, one garnet accent for actions,
+  and highlighter colours reserved for the courses themselves.
+*/
+
+:root {
+  --radius: 0.5rem;
+
+  --paper: #f6f7f9;
+  --ink: #1c2331;
+  --rule: #dde2e9;
+  --garnet: #8c1d2f;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--garnet);
+  --primary-foreground: #ffffff;
+  --secondary: #e9ecf1;
+  --secondary-foreground: var(--ink);
+  --muted: #eceff3;
+  --muted-foreground: #5b6474;
+  --accent: #e9ecf1;
+  --accent-foreground: var(--ink);
+  --destructive: #c62828;
+  --border: var(--rule);
+  --input: #cfd5de;
+  --ring: #8c1d2f66;
+
+  /* Highlighters. Each course gets one. */
+  --hl-1: #ffe45c;
+  --hl-2: #8ae6bd;
+  --hl-3: #8fd0ff;
+  --hl-4: #ffa8cf;
+  --hl-5: #cdb6ff;
+  --hl-6: #ffc58a;
+  --hl-7: #b9ec74;
+  --hl-8: #7fe3e0;
+
+  --busy: #c5ccd6;
+  --grid-line: #e4e8ee;
+  --grid-line-strong: #cfd6df;
+}
+
+.dark {
+  --paper: #121722;
+  --ink: #e7ebf2;
+  --rule: #2a3242;
+  --garnet: #e0566b;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #182030;
+  --card-foreground: var(--ink);
+  --popover: #1b2333;
+  --popover-foreground: var(--ink);
+  --primary: var(--garnet);
+  --primary-foreground: #14080b;
+  --secondary: #222b3b;
+  --secondary-foreground: var(--ink);
+  --muted: #1f2737;
+  --muted-foreground: #9aa4b5;
+  --accent: #253044;
+  --accent-foreground: var(--ink);
+  --destructive: #ff6b6b;
+  --border: var(--rule);
+  --input: #334056;
+  --ring: #e0566b66;
+
+  --hl-1: #d9bf2e;
+  --hl-2: #3fbf8c;
+  --hl-3: #4aa8e8;
+  --hl-4: #e0679e;
+  --hl-5: #9a7ff0;
+  --hl-6: #e59a4f;
+  --hl-7: #8cc443;
+  --hl-8: #3fbdba;
+
+  --busy: #3a4458;
+  --grid-line: #1e2635;
+  --grid-line-strong: #2c3547;
+}
+
+@theme inline {
+  --font-sans: "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-busy: var(--busy);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    min-height: 100%;
+    font-feature-settings: "ss01";
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Highlighter stroke used on class blocks. Slightly ragged edges, like a real marker. */
+.highlight {
+  background-color: var(--hl);
+  color: #151b27;
+  clip-path: polygon(1.2% 3%, 99.2% 0%, 100% 96%, 0% 100%);
+}
+
+.busy-hatch {
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--busy) 55%, transparent) 0 6px,
+    transparent 6px 12px
+  );
+  background-color: color-mix(in oklab, var(--busy) 25%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
