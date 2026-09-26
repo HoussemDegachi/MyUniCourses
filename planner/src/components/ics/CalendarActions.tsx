@@ -25,7 +25,9 @@ export function CalendarActions({ term, active, hasContent, googleCalendarReady,
   const exportIcs = () => {
     if (!term || !active) return
     downloadFile(`${APP_NAME.toLowerCase()}-${term.id}.ics`, buildIcs(active.sections, term, APP_NAME))
-    toast.success("Exported. Open the file to add your classes to your calendar.")
+    toast.success("Exported. Open the file to add your classes to your calendar.", {
+      description: term.noClassDates?.length ? "Reading week and holidays are left out." : undefined,
+    })
   }
 
   const pushToGoogle = async () => {

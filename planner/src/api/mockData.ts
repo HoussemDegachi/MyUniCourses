@@ -5,8 +5,21 @@ import type { Course, Day, Prof, Section, SectionStatus, SectionType, Term } fro
 
 export const TERMS: Term[] = [
   // Placeholder dates. Replace with the real ones from the uOttawa academic calendar.
-  { id: "2026-fall", name: "Fall 2026", startDate: "2026-09-09", endDate: "2026-12-09" },
-  { id: "2027-winter", name: "Winter 2027", startDate: "2027-01-11", endDate: "2027-04-12" },
+  // noClassDates match what backend/src/terms.js computes for these ranges.
+  {
+    id: "2026-fall",
+    name: "Fall 2026",
+    startDate: "2026-09-09",
+    endDate: "2026-12-09",
+    noClassDates: ["2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17"],
+  },
+  {
+    id: "2027-winter",
+    name: "Winter 2027",
+    startDate: "2027-01-11",
+    endDate: "2027-04-12",
+    noClassDates: ["2027-02-15", "2027-02-16", "2027-02-17", "2027-02-18", "2027-02-19", "2027-02-20", "2027-03-26"],
+  },
 ]
 
 export const COURSES: Course[] = [
@@ -20,17 +33,33 @@ export const COURSES: Course[] = [
   { code: "PHI1101", title: "Reasoning and Critical Thinking", credits: 3 },
   { code: "ECO1102", title: "Introduction to Macroeconomics", credits: 3 },
   { code: "ENG1112", title: "Technical Report Writing", credits: 3 },
+  { code: "ITI1100", title: "Digital Systems I", credits: 3 },
+  { code: "PHY1121", title: "Fundamentals of Physics I", credits: 3 },
+  { code: "PHY1122", title: "Fundamentals of Physics II", credits: 3 },
+  { code: "CHM1311", title: "Principles of Chemistry", credits: 3 },
+  { code: "CHM1321", title: "Organic Chemistry I", credits: 3 },
+  { code: "BIO1130", title: "Introduction to Organismal Biology", credits: 3 },
+  { code: "BIO1140", title: "Introduction to Cell Biology", credits: 3 },
+  { code: "MAT1330", title: "Calculus for the Life Sciences I", credits: 3 },
+  { code: "MAT1332", title: "Calculus for the Life Sciences II", credits: 3 },
+  { code: "PSY1102", title: "Introduction to Psychology: Applications", credits: 3 },
+  { code: "SOC1101", title: "Introduction to Sociology", credits: 3 },
+  { code: "ECO1104", title: "Introduction to Microeconomics", credits: 3 },
 ]
 
 // Program sequences for the "suggested courses" button. Hardcoded for the demo.
 export const SEQUENCES: Record<string, { label: string; byTerm: Record<string, string[]> }> = {
-  "cs-year1": {
-    label: "Computer Science, year 1",
-    byTerm: {
-      "2026-fall": ["ITI1120", "MAT1320", "MAT1341", "MAT1348"],
-      "2027-winter": ["ITI1121", "MAT1322", "ENG1112"],
-    },
-  },
+  "cs-year1": seq("Computer Science", ["ITI1120", "MAT1320", "MAT1341", "MAT1348"], ["ITI1121", "MAT1322", "ENG1112"]),
+  "seg-year1": seq("Software Engineering", ["ITI1100", "ITI1120", "MAT1320", "MAT1341", "ENG1112"], ["ITI1121", "MAT1322", "MAT1348", "PHY1122"]),
+  "ceg-year1": seq("Computer Engineering", ["ITI1100", "ITI1120", "MAT1320", "MAT1341", "PHY1121"], ["ITI1121", "MAT1322", "MAT1348", "PHY1122", "ENG1112"]),
+  "bio-year1": seq("Biology", ["BIO1130", "CHM1311", "MAT1330"], ["BIO1140", "CHM1321", "MAT1332"]),
+  "psy-year1": seq("Psychology", ["PSY1101", "SOC1101", "PHI1101"], ["PSY1102", "ECO1102", "PHI1101"]),
+  "eco-year1": seq("Economics", ["ECO1104", "SOC1101", "PSY1101"], ["ECO1102", "PSY1102", "PHI1101"]),
+}
+
+// Same lists as backend/index.js.
+function seq(label: string, fall: string[], winter: string[]) {
+  return { label, byTerm: { "2026-fall": fall, "2027-winter": winter } }
 }
 
 let n = 0
@@ -126,6 +155,75 @@ export const SECTIONS: Section[] = [
   sec("ECO1102", "B00", "LEC", ["TUE"], "18:00", "20:50", "Brendan Kowalski"),
   sec("ENG1112", "A00", "LEC", ["WED"], "17:30", "20:20", "Maya Singh"),
   sec("ENG1112", "B00", "LEC", ["THU"], "08:30", "11:20", "Hugo Lefebvre"),
+
+  // ITI1100
+  sec("ITI1100", "A00", "LEC", ["TUE", "THU"], "14:30", "15:50", "Elodie Brannigan", "OPEN", "STE C0136"),
+  sec("ITI1100", "A01", "LAB", ["FRI"], "08:30", "11:20", null, "OPEN", "STE 0131"),
+  sec("ITI1100", "B00", "LEC", ["MON", "WED"], "16:00", "17:20", "Kwame Lindholm", "OPEN", "STE C0136"),
+  sec("ITI1100", "B01", "LAB", ["THU"], "17:30", "20:20", null, "OPEN", "STE 0131"),
+
+  // PHY1121
+  sec("PHY1121", "A00", "LEC", ["MON", "WED"], "11:30", "12:50", "Mireille Dunsmore", "OPEN", "MRN 032"),
+  sec("PHY1121", "A01", "DGD", ["TUE"], "17:30", "18:50", null, "OPEN", "MRN 032"),
+  sec("PHY1121", "A02", "LAB", ["FRI"], "14:30", "17:20", null, "OPEN", "MCD 146"),
+  sec("PHY1121", "B00", "LEC", ["TUE", "THU"], "16:00", "17:20", "Tariq Vandermeer", "OPEN", "MRN 032"),
+  sec("PHY1121", "B01", "DGD", ["WED"], "08:30", "09:50", null, "OPEN", "MRN 032"),
+  sec("PHY1121", "B02", "LAB", ["MON"], "17:30", "20:20", null, "WAITLIST", "MCD 146"),
+
+  // PHY1122
+  sec("PHY1122", "A00", "LEC", ["TUE", "THU"], "13:00", "14:20", "Anneliese Kowal", "OPEN", "MRN 032"),
+  sec("PHY1122", "A01", "DGD", ["FRI"], "11:30", "12:50", null, "OPEN", "MRN 032"),
+  sec("PHY1122", "B00", "LEC", ["MON", "WED"], "08:30", "09:50", "Desmond Aalto", "OPEN", "MRN 032"),
+  sec("PHY1122", "B01", "DGD", ["THU"], "14:30", "15:50", null, "OPEN", "MRN 032"),
+
+  // CHM1311
+  sec("CHM1311", "A00", "LEC", ["MON", "WED"], "10:00", "11:20", "Beatrix Nwosu", "OPEN", "MRT 205"),
+  sec("CHM1311", "A01", "LAB", ["TUE"], "13:00", "15:50", null, "OPEN", "DRO 215"),
+  sec("CHM1311", "A02", "LAB", ["THU"], "13:00", "15:50", null, "WAITLIST", "DRO 215"),
+  sec("CHM1311", "B00", "LEC", ["TUE", "THU"], "08:30", "09:50", "Callum Ferrante", "OPEN", "MRT 205"),
+  sec("CHM1311", "B01", "LAB", ["FRI"], "13:00", "15:50", null, "OPEN", "DRO 215"),
+
+  // CHM1321
+  sec("CHM1321", "A00", "LEC", ["MON", "WED"], "08:30", "09:50", "Solenne Arbour", "OPEN", "MRT 205"),
+  sec("CHM1321", "A01", "LAB", ["FRI"], "13:00", "15:50", null, "OPEN", "DRO 215"),
+  sec("CHM1321", "B00", "LEC", ["TUE", "THU"], "16:00", "17:20", "Idris Halvorsen", "OPEN", "MRT 205"),
+  sec("CHM1321", "B01", "LAB", ["WED"], "13:00", "15:50", null, "OPEN", "DRO 215"),
+
+  // BIO1130
+  sec("BIO1130", "A00", "LEC", ["TUE", "THU"], "11:30", "12:50", "Fiona Castellane", "OPEN", "GNN 1R40"),
+  sec("BIO1130", "A01", "LAB", ["WED"], "13:00", "15:50", null, "OPEN", "GNN 110"),
+  sec("BIO1130", "B00", "LEC", ["MON", "WED"], "14:30", "15:50", "Rohan Delacroix", "OPEN", "GNN 1R40"),
+  sec("BIO1130", "B01", "LAB", ["FRI"], "08:30", "11:20", null, "OPEN", "GNN 110"),
+
+  // BIO1140
+  sec("BIO1140", "A00", "LEC", ["MON", "WED"], "11:30", "12:50", "Yara Stenholm", "OPEN", "GNN 1R40"),
+  sec("BIO1140", "A01", "LAB", ["THU"], "13:00", "15:50", null, "OPEN", "GNN 110"),
+  sec("BIO1140", "B00", "LEC", ["TUE", "THU"], "10:00", "11:20", "Emeric Tadesse", "OPEN", "GNN 1R40"),
+  sec("BIO1140", "B01", "LAB", ["MON"], "14:30", "17:20", null, "OPEN", "GNN 110"),
+
+  // MAT1330
+  sec("MAT1330", "A00", "LEC", ["MON", "WED"], "08:30", "09:50", "Amira Haddad", "OPEN", "DMS 1140"),
+  sec("MAT1330", "A01", "DGD", ["FRI"], "11:30", "12:50", null, "OPEN", "DMS 1140"),
+  sec("MAT1330", "B00", "LEC", ["TUE", "THU"], "14:30", "15:50", "Paul Achterberg", "OPEN", "DMS 1140"),
+  sec("MAT1330", "B01", "DGD", ["MON"], "16:00", "17:20", null, "OPEN", "DMS 1140"),
+
+  // MAT1332
+  sec("MAT1332", "A00", "LEC", ["TUE", "THU"], "08:30", "09:50", "Hélène Tremblay", "OPEN", "DMS 1140"),
+  sec("MAT1332", "A01", "DGD", ["WED"], "10:00", "11:20", null, "OPEN", "DMS 1140"),
+  sec("MAT1332", "B00", "LEC", ["MON", "WED"], "13:00", "14:20", "Ines Carvalho", "OPEN", "DMS 1140"),
+  sec("MAT1332", "B01", "DGD", ["FRI"], "10:00", "11:20", null, "OPEN", "DMS 1140"),
+
+  // PSY1102
+  sec("PSY1102", "A00", "LEC", ["TUE", "THU"], "10:00", "11:20", "Colette Beaumont", "OPEN", "DMS 1140"),
+  sec("PSY1102", "B00", "LEC", ["WED"], "18:00", "20:50", "Wendell Asante", "OPEN", "DMS 1140"),
+
+  // SOC1101
+  sec("SOC1101", "A00", "LEC", ["MON", "WED"], "10:00", "11:20", "Noor Castellvi", "OPEN", "FSS 2005"),
+  sec("SOC1101", "B00", "LEC", ["THU"], "17:30", "20:20", "Theo Nakamura", "OPEN", "FSS 2005"),
+
+  // ECO1104
+  sec("ECO1104", "A00", "LEC", ["TUE", "THU"], "13:00", "14:20", "Leila Mansour", "OPEN", "DMS 1140"),
+  sec("ECO1104", "B00", "LEC", ["MON"], "18:00", "20:50", "Brendan Kowalski", "OPEN", "DMS 1140"),
 ]
 
 export const PROFS: Record<string, Prof> = {
@@ -148,6 +246,22 @@ export const PROFS: Record<string, Prof> = {
   "Brendan Kowalski": p("Brendan Kowalski", 2.9, 3.6, 45, 27, "Evening lecture that runs long. Grading is inconsistent.", ["Inconsistent grading"]),
   "Maya Singh": p("Maya Singh", 4.1, 2.6, 84, 36, "Detailed feedback on every report.", ["Great feedback"]),
   "Hugo Lefebvre": p("Hugo Lefebvre", 3.5, 3.1, 66, 22, "Early morning but well structured.", ["Structured"]),
+  "Elodie Brannigan": p("Elodie Brannigan", 4.4, 3.5, 89, 52, "Clear circuit walkthroughs and labs that match the lectures.", ["Clear lectures", "Good labs"]),
+  "Kwame Lindholm": p("Kwame Lindholm", 3.2, 3.9, 55, 31, "Late-afternoon lectures move fast. The textbook fills the gaps.", ["Fast-paced"]),
+  "Mireille Dunsmore": p("Mireille Dunsmore", 4.2, 3.7, 84, 67, "Lots of worked problems in class. Midterms are tough but fair.", ["Worked examples", "Fair tests"]),
+  "Tariq Vandermeer": p("Tariq Vandermeer", 2.8, 4.2, 41, 38, "Heavy on derivations. Many students study from past exams.", ["Tough grader"]),
+  "Anneliese Kowal": p("Anneliese Kowal", 4.5, 3.4, 91, 44, "Makes electricity and magnetism feel manageable. Great office hours.", ["Helpful", "Office hours"]),
+  // Desmond Aalto has no ratings on purpose
+  "Beatrix Nwosu": p("Beatrix Nwosu", 4.6, 3.2, 94, 102, "Organized slides and weekly practice sets. Labs are well run.", ["Organized", "Practice sets"]),
+  "Callum Ferrante": p("Callum Ferrante", 3.3, 3.6, 60, 48, "Early lectures, dense content. The review sessions before exams help.", ["Dense"]),
+  "Solenne Arbour": p("Solenne Arbour", 4, 4.1, 78, 57, "Organic chem is hard, but her mechanism videos are excellent.", ["Challenging", "Great videos"]),
+  "Idris Halvorsen": p("Idris Halvorsen", 3.1, 3.8, 52, 26, "Reads the textbook aloud. Exams are predictable.", ["Predictable exams"]),
+  "Fiona Castellane": p("Fiona Castellane", 4.7, 2.8, 96, 83, "Enthusiastic and funny. Field examples make it stick.", ["Engaging", "Easy to follow"]),
+  "Rohan Delacroix": p("Rohan Delacroix", 3.7, 3, 72, 35, "Solid lectures. Lab reports are graded strictly.", ["Strict lab grading"]),
+  "Yara Stenholm": p("Yara Stenholm", 4.3, 3.5, 87, 61, "Clear diagrams and fair quizzes. Keep up with readings.", ["Clear", "Readings matter"]),
+  "Emeric Tadesse": p("Emeric Tadesse", 3.4, 3.3, 63, 29, "Knowledgeable but monotone. Slides are posted early.", ["Slides posted"]),
+  "Wendell Asante": p("Wendell Asante", 4.1, 2.4, 86, 40, "Long evening lecture with great stories and easy exams.", ["Easy exams", "Evening"]),
+  // Noor Castellvi has no ratings on purpose
 }
 
 function p(name: string, rating: number, difficulty: number, wouldTakeAgain: number, numRatings: number, summary: string, tags: string[]): Prof {

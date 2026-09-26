@@ -91,16 +91,17 @@ export function generateSchedules({ courseCodes, sections, preferences, busy = [
 
     const unplaced = [];
     const perCourse = [];
-    for (const code of courseCodes)
+    for (const code of [...new Set(courseCodes)])
     {
         const options = optionsForCourse(code, units, allowedStatus, busy);
-        if (options.length === 0) unplaced.push(code);
+        if (options.length === 0) unplaced.push(whyNoOptions(code, units, allowedStatus, busy));
         else perCourse.push({ code, options });
     }
 
     perCourse.sort((a, b) => a.options.length - b.options.length);
 
     let found = search(perCourse);
+    let blocked = null;
 
     // Nothing fits. Find the one course that blocks everything and leave it out.
     if (found.length === 0 && perCourse.length > 1)
@@ -110,7 +111,7 @@ export function generateSchedules({ courseCodes, sections, preferences, busy = [
             const rest = search(perCourse.filter((_, j) => j !== i));
             if (rest.length > 0)
             {
-                unplaced.push(perCourse[i].code);
+                blocked = perCourse[i];
                 found = rest;
                 break;
             }
@@ -118,7 +119,7 @@ export function generateSchedules({ courseCodes, sections, preferences, busy = [
     }
 
     const scored = found
-        .map(combo => finish(combo, preferences, profs, [...new Set(unplaced)]))
+        .map(combo => finish(combo, preferences, profs))
         .sort(compare);
 
     // Options that differ only by which DGD you take aren't real choices, and five
@@ -131,9 +132,58 @@ export function generateSchedules({ courseCodes, sections, preferences, busy = [
         if (!byLectures.has(key)) byLectures.set(key, schedule);
     }
 
+    // A blocked course clashes with different things depending on how the rest is
+    // arranged, so each schedule names what it overlaps in that schedule.
     return withAlternativeSecond([...byLectures.values()])
         .slice(0, MAX_RESULTS)
-        .map((s, i) => ({ ...s, id: `option-${i + 1}` }));
+        .map((s, i) => ({
+            ...s,
+            id: `option-${i + 1}`,
+            unplaced: blocked
+                ? [...unplaced, { courseCode: blocked.code, reason: "CLASH", conflictsWith: overlappedCourses(blocked.options, s.sections) }]
+                : unplaced,
+        }));
+}
+
+// Checked in the same order the filters run, so the first one that empties the
+// list is the reason.
+function whyNoOptions(code, units, allowedStatus, busy)
+{
+    const result = (reason, conflictsWith = []) => ({ courseCode: code, reason, conflictsWith });
+
+    const mine = units.filter(u => u.courseCode === code);
+    if (!mine.length) return result("NOT_OFFERED");
+
+    const allowed = mine.filter(u => allowedStatus.includes(u.status));
+    if (!allowed.length)
+    {
+        const waitlisted = mine.some(u => u.status === "WAITLIST") && !allowedStatus.includes("WAITLIST");
+        return result(waitlisted ? "WAITLIST_ONLY" : "FULL");
+    }
+
+    if (optionsForCourse(code, units, allowedStatus, []).length)
+    {
+        const titles = busy
+            .filter(b => allowed.some(u => u.sections.some(s => hitsBusy(s, [b]))))
+            .map(b => b.title || "a busy block");
+        return result("BUSY", [...new Set(titles)]);
+    }
+
+    // Its own components never line up without overlapping each other.
+    return result("CLASH");
+}
+
+function overlappedCourses(options, sections)
+{
+    const hit = new Set();
+    for (const option of options)
+    {
+        for (const s of option.flatMap(u => u.sections))
+        {
+            for (const other of sections) if (sectionsOverlap(s, other)) hit.add(other.courseCode);
+        }
+    }
+    return [...hit].sort();
 }
 
 // The second slot is the alternative. The runner-up is usually the best schedule
@@ -199,7 +249,7 @@ function search(perCourse)
     return found;
 }
 
-function finish(unitCombo, preferences, profs, unplaced)
+function finish(unitCombo, preferences, profs)
 {
     const sections = unitCombo.flatMap(u => u.sections);
     const breakdown = scoreBreakdown(sections, preferences, profs);
@@ -215,7 +265,7 @@ function finish(unitCombo, preferences, profs, unplaced)
         units: unitCombo.map(u => ({ key: u.key, courseCode: u.courseCode, sectionCode: u.sectionCode, group: u.group, type: u.type, status: u.status })),
         score,
         breakdown,
-        unplaced: [...unplaced],
+        unplaced: [],
         daysOnCampus: days.length,
         gapMinutes: totalGapMinutes(sections),
         missedDaysOff: (preferences.daysOff || []).filter(d => days.includes(d)).length,
@@ -271,7 +321,7 @@ export function totalGapMinutes(sections)
 
 export function daysOnCampus(sections)
 {
-    const order = ["MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    const order = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
     const used = new Set(sections.flatMap(s => s.days));
     return order.filter(d => used.has(d));
 }
@@ -356,6 +406,6 @@ export function describeSchedule(facts)
     }
     if (facts.waitlistedSections.length) parts.push(`${facts.waitlistedSections.length} section${facts.waitlistedSections.length === 1 ? " is" : "s are"} waitlisted.`);
     if (!facts.isBest && facts.pointsBehindBest > 0) parts.push(`Scores ${facts.pointsBehindBest} point${facts.pointsBehindBest === 1 ? "" : "s"} below the top option.`);
-    if (facts.coursesThatDidNotFit.length) parts.push(`Couldn't fit ${facts.coursesThatDidNotFit.join(", ")}.`);
+    if (facts.coursesThatDidNotFit.length) parts.push(`Couldn't fit ${facts.coursesThatDidNotFit.map(u => u.courseCode).join(", ")}.`);
     return parts.join(" ");
 }

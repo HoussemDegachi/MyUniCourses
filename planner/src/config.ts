@@ -23,5 +23,12 @@ export const SHOWN_SCHEDULES = 2
 export const GRID_MIN_HOUR = 8
 export const GRID_MAX_HOUR = 22
 
-// Programs offered in the "suggested courses" button.
-export const PROGRAMS = [{ id: "cs-year1", label: "Computer Science, year 1" }]
+// Programs offered in the "suggested courses" picker. Ids match SEQUENCES in backend/index.js.
+export const PROGRAMS = [
+  { id: "cs-year1", label: "Computer Science" },
+  { id: "seg-year1", label: "Software Engineering" },
+  { id: "ceg-year1", label: "Computer Engineering" },
+  { id: "bio-year1", label: "Biology" },
+  { id: "psy-year1", label: "Psychology" },
+  { id: "eco-year1", label: "Economics" },
+]

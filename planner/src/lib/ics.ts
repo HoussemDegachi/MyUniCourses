@@ -5,6 +5,7 @@ import { fromMinutes } from "@/lib/time"
 // ---------- Import ----------
 
 const ICAL_DAY: Record<string, Day | undefined> = {
+  SU: "SUN",
   MO: "MON",
   TU: "TUE",
   WE: "WED",
@@ -13,7 +14,7 @@ const ICAL_DAY: Record<string, Day | undefined> = {
   SA: "SAT",
 }
 // ical.js dayOfWeek(): 1 is Sunday, 2 is Monday, and so on.
-const JS_DAY: (Day | undefined)[] = [undefined, undefined, "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+const JS_DAY: (Day | undefined)[] = [undefined, "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
 
 export interface ImportResult {
   blocks: BusyBlock[]
@@ -60,8 +61,8 @@ export function parseIcs(text: string): ImportResult {
 
 // ---------- Export ----------
 
-const RFC_DAY: Record<Day, string> = { MON: "MO", TUE: "TU", WED: "WE", THU: "TH", FRI: "FR", SAT: "SA" }
-const JS_INDEX: Record<Day, number> = { MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 }
+const RFC_DAY: Record<Day, string> = { MON: "MO", TUE: "TU", WED: "WE", THU: "TH", FRI: "FR", SAT: "SA", SUN: "SU" }
+const JS_INDEX: Record<Day, number> = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 }
 
 // Ottawa time zone, so imported events land at the right hour in any calendar app.
 const VTIMEZONE = [
@@ -84,7 +85,6 @@ const VTIMEZONE = [
   "END:VTIMEZONE",
 ]
 
-// Note: this doesn't skip reading week or holidays. Add EXDATE lines if there's time.
 export function buildIcs(sections: Section[], term: Term, calendarName: string): string {
   const lines = [
     "BEGIN:VCALENDAR",
@@ -106,6 +106,7 @@ export function buildIcs(sections: Section[], term: Term, calendarName: string):
       `DTSTART;TZID=America/Toronto:${first}T${s.start.replace(":", "")}00`,
       `DTEND;TZID=America/Toronto:${first}T${s.end.replace(":", "")}00`,
       `RRULE:FREQ=WEEKLY;BYDAY=${s.days.map((d) => RFC_DAY[d]).join(",")};UNTIL=${until}`,
+      ...exdates(s, term),
       `SUMMARY:${escapeText(`${s.courseCode} ${s.type}`)}`,
       ...(s.location ? [`LOCATION:${escapeText(s.location)}`] : []),
       ...(s.prof ? [`DESCRIPTION:${escapeText(`Prof: ${s.prof}`)}`] : []),
@@ -114,6 +115,20 @@ export function buildIcs(sections: Section[], term: Term, calendarName: string):
   }
   lines.push("END:VCALENDAR")
   return lines.map(fold).join("\r\n") + "\r\n"
+}
+
+// Reading week and holidays. EXDATE must match the start time of the occurrence
+// it cancels, so each class gets its own list.
+function exdates(s: Section, term: Term): string[] {
+  const time = `T${s.start.replace(":", "")}00`
+  const dates = (term.noClassDates ?? []).filter((d) => s.days.includes(dayOf(d))).map((d) => d.replace(/-/g, "") + time)
+  return dates.length ? [`EXDATE;TZID=America/Toronto:${dates.join(",")}`] : []
+}
+
+const DAY_BY_INDEX: (Day | undefined)[] = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+function dayOf(isoDate: string): Day {
+  const [y, m, d] = isoDate.split("-").map(Number)
+  return DAY_BY_INDEX[new Date(Date.UTC(y, m - 1, d)).getUTCDay()] as Day
 }
 
 // The first date on or after the term start that falls on one of the section's days.

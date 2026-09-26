@@ -73,12 +73,40 @@ app.get("/api/sections", route(async (req, res) =>
 }));
 
 // Suggested courses per program. Hardcoded for now: uOttawa publishes sequences on
-// the catalogue pages, and scraping them properly is its own project.
+// the catalogue pages, and scraping them properly is its own project. These are the
+// usual first-year required courses, not the full official sequence (electives are
+// left to the student), so check them against the catalogue before relying on them.
+// Keep the ids in step with PROGRAMS in planner/src/config.ts.
 const SEQUENCES = {
     "cs-year1": {
-        label: "Computer Science, year 1",
+        label: "Computer Science",
         fall: ["ITI1120", "MAT1320", "MAT1341", "MAT1348"],
         winter: ["ITI1121", "MAT1322", "ENG1112"],
+    },
+    "seg-year1": {
+        label: "Software Engineering",
+        fall: ["ITI1100", "ITI1120", "MAT1320", "MAT1341", "ENG1112"],
+        winter: ["ITI1121", "MAT1322", "MAT1348", "PHY1122"],
+    },
+    "ceg-year1": {
+        label: "Computer Engineering",
+        fall: ["ITI1100", "ITI1120", "MAT1320", "MAT1341", "PHY1121"],
+        winter: ["ITI1121", "MAT1322", "MAT1348", "PHY1122", "ENG1112"],
+    },
+    "bio-year1": {
+        label: "Biology",
+        fall: ["BIO1130", "CHM1311", "MAT1330"],
+        winter: ["BIO1140", "CHM1321", "MAT1332"],
+    },
+    "psy-year1": {
+        label: "Psychology",
+        fall: ["PSY1101", "SOC1101", "PHI1101"],
+        winter: ["PSY1102", "ECO1102", "PHI1101"],
+    },
+    "eco-year1": {
+        label: "Economics",
+        fall: ["ECO1104", "SOC1101", "PSY1101"],
+        winter: ["ECO1102", "PSY1102", "PHI1101"],
     },
 };
 

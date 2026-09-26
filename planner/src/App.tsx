@@ -1,6 +1,7 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { CalendarRangeIcon, Loader2Icon, MoonIcon, RefreshCwIcon, SunIcon, TriangleAlertIcon } from "lucide-react"
 import { MotionConfig } from "motion/react"
+import { toast } from "sonner"
 import { AccountButton } from "@/components/auth/AccountButton"
 import { CourseSearch } from "@/components/controls/CourseSearch"
 import { PreferencePanel } from "@/components/controls/PreferencePanel"
@@ -8,6 +9,7 @@ import { PromptBox } from "@/components/controls/PromptBox"
 import { ScrollPanel } from "@/components/controls/ScrollPanel"
 import { TermSelect } from "@/components/controls/TermSelect"
 import { CalendarActions } from "@/components/ics/CalendarActions"
+import { CompareBar } from "@/components/schedule/CompareBar"
 import { EmptyState } from "@/components/schedule/EmptyState"
 import { Explanation } from "@/components/schedule/Explanation"
 import { ScheduleTabs } from "@/components/schedule/ScheduleTabs"
@@ -19,6 +21,7 @@ import { Separator } from "@/components/ui/separator"
 import { Toaster } from "@/components/ui/sonner"
 import { APP_NAME } from "@/config"
 import { usePlanner } from "@/hooks/usePlanner"
+import { compareSchedules } from "@/lib/compare"
 import { findConflicts } from "@/lib/conflicts"
 
 export default function App() {
@@ -26,6 +29,14 @@ export default function App() {
   const courseOrder = p.courses.map((c) => c.code)
   const sections = p.active?.sections ?? []
   const conflicts = useMemo(() => findConflicts(sections, p.busy), [sections, p.busy])
+
+  // Only the alternative gets compared; the best match is the baseline.
+  const best = p.schedules[0]
+  const comparison = useMemo(
+    () => (best && p.active && p.active.id !== best.id ? compareSchedules(best, p.active, p.profs) : null),
+    [best, p.active, p.profs],
+  )
+  const [showChanges, setShowChanges] = useState(false)
 
   return (
     <MotionConfig reducedMotion="user">
@@ -93,6 +104,10 @@ export default function App() {
               </div>
             </div>
 
+            {comparison && !p.generating && (
+              <CompareBar comparison={comparison} highlight={showChanges} onHighlightChange={setShowChanges} />
+            )}
+
             {p.outdated && !p.generating && (
               <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 rounded-lg border border-dashed px-3 py-1.5 text-sm">
                 <span className="text-muted-foreground">Your settings changed since these were built.</span>
@@ -120,6 +135,8 @@ export default function App() {
                 onLoadProf={p.loadProf}
                 onSwap={p.active ? p.openSwap : undefined}
                 dimmed={p.generating}
+                changed={comparison?.changedSectionIds}
+                focusChanged={showChanges && Boolean(comparison)}
               />
 
               {p.generating && (
@@ -141,6 +158,10 @@ export default function App() {
                   text={p.explanations[p.active.id]}
                   loading={p.explaining}
                   courseCount={p.courses.length}
+                  onAllowWaitlist={() => {
+                    p.setPreferences((prev) => ({ ...prev, allowedStatus: ["OPEN", "WAITLIST"] }))
+                    toast("Waitlisted sections are allowed now. Rebuild to include them.")
+                  }}
                 />
               </div>
             )}

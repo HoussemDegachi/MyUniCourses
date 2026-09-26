@@ -1,7 +1,7 @@
 import type { Day } from "@/types"
 
 export const WEEKDAYS: Day[] = ["MON", "TUE", "WED", "THU", "FRI"]
-export const ALL_DAYS: Day[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT"]
+export const ALL_DAYS: Day[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
 export const DAY_LABEL: Record<Day, string> = {
   MON: "Monday",
@@ -10,6 +10,7 @@ export const DAY_LABEL: Record<Day, string> = {
   THU: "Thursday",
   FRI: "Friday",
   SAT: "Saturday",
+  SUN: "Sunday",
 }
 
 export const DAY_SHORT: Record<Day, string> = {
@@ -19,6 +20,7 @@ export const DAY_SHORT: Record<Day, string> = {
   THU: "Thu",
   FRI: "Fri",
   SAT: "Sat",
+  SUN: "Sun",
 }
 
 export function toMinutes(t: string): number {

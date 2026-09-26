@@ -46,6 +46,9 @@
   --hl-7: #b9ec74;
   --hl-8: #7fe3e0;
 
+  --better: #1d7a4c;
+  --worse: #c62828;
+
   --busy: #c5ccd6;
   --grid-line: #e4e8ee;
   --grid-line-strong: #cfd6df;
@@ -84,6 +87,9 @@
   --hl-6: #e59a4f;
   --hl-7: #8cc443;
   --hl-8: #3fbdba;
+
+  --better: #5fd39b;
+  --worse: #ff6b6b;
 
   --busy: #3a4458;
   --grid-line: #1e2635;

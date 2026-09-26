@@ -13,6 +13,7 @@ interface Props {
   day: Day
   color: string
   conflicted: boolean
+  changed: boolean
   prof: Prof | null | undefined // undefined means still loading
   onLoadProf: (name: string) => void
   onSwap?: (unitKey: string) => void
@@ -26,7 +27,7 @@ const TYPE_LABEL: Record<string, string> = {
   SEM: "Seminar",
 }
 
-export function ClassBlock({ section, day, color, conflicted, prof, onLoadProf, onSwap }: Props) {
+export function ClassBlock({ section, day, color, conflicted, changed, prof, onLoadProf, onSwap }: Props) {
   const ref = useRef<HTMLButtonElement>(null)
   const [size, setSize] = useState({ h: 0, w: 0 })
 
@@ -51,12 +52,13 @@ export function ClassBlock({ section, day, color, conflicted, prof, onLoadProf, 
           ref={ref}
           type="button"
           className={cn(
-            "highlight h-full w-full overflow-hidden px-1.5 py-0.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "highlight relative h-full w-full overflow-hidden px-1.5 py-0.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring",
             conflicted && "ring-2 ring-destructive",
           )}
           style={{ ["--hl" as string]: color }}
-          aria-label={`${section.courseCode} ${TYPE_LABEL[section.type] ?? section.type}, ${DAY_LABEL[day]} ${formatRange(section.start, section.end)}${section.prof ? `, ${section.prof}` : ""}`}
+          aria-label={`${section.courseCode} ${TYPE_LABEL[section.type] ?? section.type}, ${DAY_LABEL[day]} ${formatRange(section.start, section.end)}${section.prof ? `, ${section.prof}` : ""}${changed ? ", differs from your best match" : ""}`}
         >
+          {changed && <span aria-hidden className="absolute right-1 bottom-1 size-1.5 rounded-full bg-current opacity-80" />}
           <span className="flex items-baseline gap-1 text-[12px] leading-tight font-bold">
             <span className="truncate">{section.courseCode}</span>
             <span className="shrink-0 text-[10px] font-medium opacity-70">{section.type}</span>

@@ -5,7 +5,7 @@ import { getSubjectSections, getTerms } from "../scrapper/courseData.js";
 import { cached } from "./lib/cache.js";
 import { toCourses, toSections } from "./normalize.js";
 import { sampleScraped, sampleTerms } from "./sample.js";
-import { learnDates, withDates } from "./terms.js";
+import { learnDates, withDates, withNoClassDates } from "./terms.js";
 
 const TERM_TTL = 12 * 60 * 60 * 1000;
 const SUBJECT_TTL = 60 * 60 * 1000;
@@ -17,17 +17,17 @@ export const scraperIsUp = () => scraperWorking;
 
 export async function terms()
 {
-    if (useSample()) return sampleTerms();
+    if (useSample()) return sampleTerms().map(withNoClassDates);
     try
     {
         const list = await cached("terms", TERM_TTL, getTerms);
         scraperWorking = true;
-        return list.map(withDates);
+        return list.map(withDates).map(withNoClassDates);
     }
     catch
     {
         scraperWorking = false;
-        return sampleTerms();
+        return sampleTerms().map(withNoClassDates);
     }
 }
 

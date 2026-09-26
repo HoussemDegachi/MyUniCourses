@@ -14,8 +14,8 @@ const MANAGEMENT_SCOPE = "read:user_idp_tokens";
 const GOOGLE_API = "https://www.googleapis.com/calendar/v3";
 const TZ = "America/Toronto";
 
-const RFC_DAY = { MON: "MO", TUE: "TU", WED: "WE", THU: "TH", FRI: "FR", SAT: "SA" };
-const JS_INDEX = { MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
+const RFC_DAY = { MON: "MO", TUE: "TU", WED: "WE", THU: "TH", FRI: "FR", SAT: "SA", SUN: "SU" };
+const JS_INDEX = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
 
 export const calendarEnabled = () => Boolean(
     process.env.AUTH0_DOMAIN && process.env.AUTH0_M2M_CLIENT_ID && process.env.AUTH0_M2M_CLIENT_SECRET,
@@ -92,6 +92,21 @@ function firstMeeting(termStart, days)
     return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
 }
 
+// Reading week and holidays. Google wants each EXDATE at the occurrence's own start time.
+const DAY_BY_INDEX = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+function exdates(section, term)
+{
+    const time = `T${section.start.replace(":", "")}00`;
+    const dates = (term.noClassDates || [])
+        .filter(d =>
+        {
+            const [y, m, day] = d.split("-").map(Number);
+            return section.days.includes(DAY_BY_INDEX[new Date(Date.UTC(y, m - 1, day)).getUTCDay()]);
+        })
+        .map(d => d.replace(/-/g, "") + time);
+    return dates.length ? [`EXDATE;TZID=${TZ}:${dates.join(",")}`] : [];
+}
+
 export async function pushSchedule({ userId, schedule, term, calendarName })
 {
     const token = await getGoogleToken(userId);
@@ -120,7 +135,7 @@ export async function pushSchedule({ userId, schedule, term, calendarName })
                         .filter(Boolean).join("\n"),
                     start: { dateTime: `${date}T${s.start}:00`, timeZone: TZ },
                     end: { dateTime: `${date}T${s.end}:00`, timeZone: TZ },
-                    recurrence: [`RRULE:FREQ=WEEKLY;BYDAY=${s.days.map(d => RFC_DAY[d]).join(",")};UNTIL=${until}`],
+                    recurrence: [`RRULE:FREQ=WEEKLY;BYDAY=${s.days.map(d => RFC_DAY[d]).join(",")};UNTIL=${until}`, ...exdates(s, term)],
                     reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 20 }] },
                 }),
             });

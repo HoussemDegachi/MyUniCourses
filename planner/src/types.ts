@@ -1,7 +1,7 @@
 // Shared data shapes. Keep these identical to the backend's JSON.
 // If the backend changes a field, change it here first.
 
-export type Day = "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT"
+export type Day = "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN"
 
 export type SectionType = "LEC" | "DGD" | "LAB" | "TUT" | "SEM"
 
@@ -15,6 +15,7 @@ export interface Term {
   name: string // e.g. "Fall 2026"
   startDate: string // ISO date, first day of classes
   endDate: string // ISO date, last day of classes
+  noClassDates: string[] // ISO dates inside the term with no classes: reading week, holidays
 }
 
 export interface Course {
@@ -75,7 +76,20 @@ export interface Schedule {
   units: Unit[] // the components chosen, one per course component
   score: number // 0 to 100
   breakdown: ScoreBreakdown
-  unplaced: string[] // course codes that could not fit
+  unplaced: Unplaced[] // courses that could not fit, and why
+}
+
+// NOT_OFFERED  no sections this term
+// FULL         every section is closed
+// WAITLIST_ONLY  only waitlisted sections left, and waitlists are turned off
+// BUSY         every usable section overlaps a busy block
+// CLASH        it can't fit around the other courses in this schedule
+export type UnplacedReason = "NOT_OFFERED" | "FULL" | "WAITLIST_ONLY" | "BUSY" | "CLASH"
+
+export interface Unplaced {
+  courseCode: string
+  reason: UnplacedReason
+  conflictsWith: string[] // BUSY: busy block titles. CLASH: course codes in this schedule.
 }
 
 export interface Prof {

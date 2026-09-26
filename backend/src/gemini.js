@@ -56,7 +56,7 @@ const PREFERENCE_SCHEMA = {
     properties: {
         earliestStart: { type: "string", nullable: true, description: "24h HH:MM, or null for no preference" },
         latestEnd: { type: "string", nullable: true, description: "24h HH:MM, or null for no preference" },
-        daysOff: { type: "array", items: { type: "string", enum: ["MON", "TUE", "WED", "THU", "FRI", "SAT"] } },
+        daysOff: { type: "array", items: { type: "string", enum: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] } },
         allowWaitlist: { type: "boolean" },
         weights: {
             type: "object",
@@ -99,7 +99,7 @@ export async function parsePreferences(prompt, current)
 
     const clamp = (n, fallback) => (typeof n === "number" && Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : fallback);
     const time = v => (typeof v === "string" && /^\d{1,2}:\d{2}$/.test(v) ? v.padStart(5, "0") : null);
-    const days = Array.isArray(parsed.daysOff) ? parsed.daysOff.filter(d => ["MON", "TUE", "WED", "THU", "FRI", "SAT"].includes(d)) : [];
+    const days = Array.isArray(parsed.daysOff) ? parsed.daysOff.filter(d => ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].includes(d)) : [];
 
     return {
         earliestStart: parsed.earliestStart === undefined ? current.earliestStart : time(parsed.earliestStart),
@@ -147,7 +147,9 @@ You are given facts already computed from the schedule. Use only those facts.
 - Two or three sentences. Speak to the student as "you".
 - Lead with what the schedule gives them, then name the real trade-off.
 - If the schedule scores below the top option, say plainly what it gives up.
-- If courses could not be placed, say so.
+- If courses could not be placed, say which and why, using only the reason and conflictsWith given for each.
+  NOT_OFFERED: not offered this term. FULL: every section is full. WAITLIST_ONLY: only waitlisted sections are left.
+  BUSY: every section overlaps the busy times named. CLASH: it overlaps the courses named in this schedule.
 - No greetings, no headings, no bullet points.`;
 
 export async function explainSchedules(items)

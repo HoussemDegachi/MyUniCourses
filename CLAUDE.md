@@ -77,7 +77,7 @@ The frontend only ever talks to `planner/src/api/client.ts`. All state lives in
 
 **Types are the contract.** `planner/src/types.ts` defines every shape crossing
 the wire. Change it and the backend at the same time, or things break silently.
-Times are 24h strings (`"13:30"`). Days are `"MON"` to `"SAT"`.
+Times are 24h strings (`"13:30"`). Days are `"MON"` to `"SUN"`.
 
 **Vocabulary, used identically in both codebases:**
 - *section*: one meeting pattern (days + time) of one component

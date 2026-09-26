@@ -7,7 +7,7 @@ appears where the frontend branches on it.
 Every shape below is defined in `planner/src/types.ts`. That file is the
 contract: change it and the backend together.
 
-Times are 24h strings, `"08:30"`. Days are `"MON"` to `"SAT"`. Status is
+Times are 24h strings, `"08:30"`. Days are `"MON"` to `"SUN"`. Status is
 `"OPEN"`, `"WAITLIST"` or `"CLOSED"`; the UI only ever offers the first two.
 
 ## Course data

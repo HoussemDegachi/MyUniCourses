@@ -142,6 +142,6 @@ function describe(s: Schedule, best: Schedule, prefs: Preferences): string {
     parts.push(`Scores ${diff} point${diff === 1 ? "" : "s"} below the top option.`)
   }
 
-  if (s.unplaced.length) parts.push(`Couldn't fit ${s.unplaced.join(", ")}.`)
+  if (s.unplaced.length) parts.push(`Couldn't fit ${s.unplaced.map((u) => u.courseCode).join(", ")}.`)
   return parts.join(" ")
 }

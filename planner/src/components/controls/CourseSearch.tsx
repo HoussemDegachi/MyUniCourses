@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { courseColorVar } from "@/lib/colors"
 import type { Course } from "@/types"
 
@@ -100,12 +101,20 @@ export function CourseSearch({ termId, selected, onAdd, onRemove, onAddSequence 
         <p className="text-sm text-muted-foreground">Search for courses above, or start from your program's suggested courses.</p>
       )}
 
-      {PROGRAMS.map((prog) => (
-        <Button key={prog.id} variant="ghost" size="sm" className="justify-start px-2 text-primary" onClick={() => onAddSequence(prog.id)} disabled={!termId}>
-          <SparklesIcon />
-          Add {prog.label} courses
-        </Button>
-      ))}
+      {/* Picking a program adds its courses straight away, then the picker resets. */}
+      <Select value="" onValueChange={onAddSequence} disabled={!termId}>
+        <SelectTrigger size="sm" className="w-full justify-start [&>svg:last-child]:ml-auto" aria-label="Add a program's first-year courses">
+          <SparklesIcon className="text-primary" />
+          <SelectValue placeholder="Add first-year courses for a program" />
+        </SelectTrigger>
+        <SelectContent>
+          {PROGRAMS.map((prog) => (
+            <SelectItem key={prog.id} value={prog.id}>
+              {prog.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   )
 }

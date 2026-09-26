@@ -49,6 +49,61 @@ const RAW = [
     ["MAT1322", "Calculus II", "B00", "LEC", "MoWe", "16:00", "17:20", "Paul Achterberg", "Open", "DMS 1140"],
     ["MAT1322", "Calculus II", "B01", "DGD", "Th", "17:30", "18:50", null, "Open", "DMS 1140"],
 
+    ["ITI1100", "Digital Systems I", "A00", "LEC", "TuTh", "14:30", "15:50", "Elodie Brannigan", "Open", "STE C0136"],
+    ["ITI1100", "Digital Systems I", "A01", "LAB", "Fr", "08:30", "11:20", null, "Open", "STE 0131"],
+    ["ITI1100", "Digital Systems I", "B00", "LEC", "MoWe", "16:00", "17:20", "Kwame Lindholm", "Open", "STE C0136"],
+    ["ITI1100", "Digital Systems I", "B01", "LAB", "Th", "17:30", "20:20", null, "Open", "STE 0131"],
+
+    ["PHY1121", "Fundamentals of Physics I", "A00", "LEC", "MoWe", "11:30", "12:50", "Mireille Dunsmore", "Open", "MRN 032"],
+    ["PHY1121", "Fundamentals of Physics I", "A01", "DGD", "Tu", "17:30", "18:50", null, "Open", "MRN 032"],
+    ["PHY1121", "Fundamentals of Physics I", "A02", "LAB", "Fr", "14:30", "17:20", null, "Open", "MCD 146"],
+    ["PHY1121", "Fundamentals of Physics I", "B00", "LEC", "TuTh", "16:00", "17:20", "Tariq Vandermeer", "Open", "MRN 032"],
+    ["PHY1121", "Fundamentals of Physics I", "B01", "DGD", "We", "08:30", "09:50", null, "Open", "MRN 032"],
+    ["PHY1121", "Fundamentals of Physics I", "B02", "LAB", "Mo", "17:30", "20:20", null, "Wait List", "MCD 146"],
+
+    ["PHY1122", "Fundamentals of Physics II", "A00", "LEC", "TuTh", "13:00", "14:20", "Anneliese Kowal", "Open", "MRN 032"],
+    ["PHY1122", "Fundamentals of Physics II", "A01", "DGD", "Fr", "11:30", "12:50", null, "Open", "MRN 032"],
+    ["PHY1122", "Fundamentals of Physics II", "B00", "LEC", "MoWe", "08:30", "09:50", "Desmond Aalto", "Open", "MRN 032"],
+    ["PHY1122", "Fundamentals of Physics II", "B01", "DGD", "Th", "14:30", "15:50", null, "Open", "MRN 032"],
+
+    ["CHM1311", "Principles of Chemistry", "A00", "LEC", "MoWe", "10:00", "11:20", "Beatrix Nwosu", "Open", "MRT 205"],
+    ["CHM1311", "Principles of Chemistry", "A01", "LAB", "Tu", "13:00", "15:50", null, "Open", "DRO 215"],
+    ["CHM1311", "Principles of Chemistry", "A02", "LAB", "Th", "13:00", "15:50", null, "Wait List", "DRO 215"],
+    ["CHM1311", "Principles of Chemistry", "B00", "LEC", "TuTh", "08:30", "09:50", "Callum Ferrante", "Open", "MRT 205"],
+    ["CHM1311", "Principles of Chemistry", "B01", "LAB", "Fr", "13:00", "15:50", null, "Open", "DRO 215"],
+
+    ["CHM1321", "Organic Chemistry I", "A00", "LEC", "MoWe", "08:30", "09:50", "Solenne Arbour", "Open", "MRT 205"],
+    ["CHM1321", "Organic Chemistry I", "A01", "LAB", "Fr", "13:00", "15:50", null, "Open", "DRO 215"],
+    ["CHM1321", "Organic Chemistry I", "B00", "LEC", "TuTh", "16:00", "17:20", "Idris Halvorsen", "Open", "MRT 205"],
+    ["CHM1321", "Organic Chemistry I", "B01", "LAB", "We", "13:00", "15:50", null, "Open", "DRO 215"],
+
+    ["BIO1130", "Introduction to Organismal Biology", "A00", "LEC", "TuTh", "11:30", "12:50", "Fiona Castellane", "Open", "GNN 1R40"],
+    ["BIO1130", "Introduction to Organismal Biology", "A01", "LAB", "We", "13:00", "15:50", null, "Open", "GNN 110"],
+    ["BIO1130", "Introduction to Organismal Biology", "B00", "LEC", "MoWe", "14:30", "15:50", "Rohan Delacroix", "Open", "GNN 1R40"],
+    ["BIO1130", "Introduction to Organismal Biology", "B01", "LAB", "Fr", "08:30", "11:20", null, "Open", "GNN 110"],
+
+    ["BIO1140", "Introduction to Cell Biology", "A00", "LEC", "MoWe", "11:30", "12:50", "Yara Stenholm", "Open", "GNN 1R40"],
+    ["BIO1140", "Introduction to Cell Biology", "A01", "LAB", "Th", "13:00", "15:50", null, "Open", "GNN 110"],
+    ["BIO1140", "Introduction to Cell Biology", "B00", "LEC", "TuTh", "10:00", "11:20", "Emeric Tadesse", "Open", "GNN 1R40"],
+    ["BIO1140", "Introduction to Cell Biology", "B01", "LAB", "Mo", "14:30", "17:20", null, "Open", "GNN 110"],
+
+    ["MAT1330", "Calculus for the Life Sciences I", "A00", "LEC", "MoWe", "08:30", "09:50", "Amira Haddad", "Open", "DMS 1140"],
+    ["MAT1330", "Calculus for the Life Sciences I", "A01", "DGD", "Fr", "11:30", "12:50", null, "Open", "DMS 1140"],
+    ["MAT1330", "Calculus for the Life Sciences I", "B00", "LEC", "TuTh", "14:30", "15:50", "Paul Achterberg", "Open", "DMS 1140"],
+    ["MAT1330", "Calculus for the Life Sciences I", "B01", "DGD", "Mo", "16:00", "17:20", null, "Open", "DMS 1140"],
+
+    ["MAT1332", "Calculus for the Life Sciences II", "A00", "LEC", "TuTh", "08:30", "09:50", "Hélène Tremblay", "Open", "DMS 1140"],
+    ["MAT1332", "Calculus for the Life Sciences II", "A01", "DGD", "We", "10:00", "11:20", null, "Open", "DMS 1140"],
+    ["MAT1332", "Calculus for the Life Sciences II", "B00", "LEC", "MoWe", "13:00", "14:20", "Ines Carvalho", "Open", "DMS 1140"],
+    ["MAT1332", "Calculus for the Life Sciences II", "B01", "DGD", "Fr", "10:00", "11:20", null, "Open", "DMS 1140"],
+
+    ["PSY1102", "Introduction to Psychology: Applications", "A00", "LEC", "TuTh", "10:00", "11:20", "Colette Beaumont", "Open", "DMS 1140"],
+    ["PSY1102", "Introduction to Psychology: Applications", "B00", "LEC", "We", "18:00", "20:50", "Wendell Asante", "Open", "DMS 1140"],
+    ["SOC1101", "Introduction to Sociology", "A00", "LEC", "MoWe", "10:00", "11:20", "Noor Castellvi", "Open", "FSS 2005"],
+    ["SOC1101", "Introduction to Sociology", "B00", "LEC", "Th", "17:30", "20:20", "Theo Nakamura", "Open", "FSS 2005"],
+    ["ECO1104", "Introduction to Microeconomics", "A00", "LEC", "TuTh", "13:00", "14:20", "Leila Mansour", "Open", "DMS 1140"],
+    ["ECO1104", "Introduction to Microeconomics", "B00", "LEC", "Mo", "18:00", "20:50", "Brendan Kowalski", "Open", "DMS 1140"],
+
     ["PSY1101", "Introduction to Psychology: Foundations", "A00", "LEC", "Mo", "19:00", "21:50", "Colette Beaumont", "Open", "DMS 1140"],
     ["PSY1101", "Introduction to Psychology: Foundations", "B00", "LEC", "WeFr", "11:30", "12:50", "Theo Nakamura", "Open", "DMS 1140"],
     ["PHI1101", "Reasoning and Critical Thinking", "A00", "LEC", "TuTh", "14:30", "15:50", "Grace Adeyemi", "Open", "FSS 2005"],
@@ -80,6 +135,20 @@ const PROFS = {
     "Brendan Kowalski": [2.9, 3.6, 45, 27, "Evening lecture that runs long. Grading is inconsistent.", ["Inconsistent grading"]],
     "Maya Singh": [4.1, 2.6, 84, 36, "Detailed feedback on every report.", ["Great feedback"]],
     "Hugo Lefebvre": [3.5, 3.1, 66, 22, "Early morning but well structured.", ["Structured"]],
+    "Elodie Brannigan": [4.4, 3.5, 89, 52, "Clear circuit walkthroughs and labs that match the lectures.", ["Clear lectures", "Good labs"]],
+    "Kwame Lindholm": [3.2, 3.9, 55, 31, "Late-afternoon lectures move fast. The textbook fills the gaps.", ["Fast-paced"]],
+    "Mireille Dunsmore": [4.2, 3.7, 84, 67, "Lots of worked problems in class. Midterms are tough but fair.", ["Worked examples", "Fair tests"]],
+    "Tariq Vandermeer": [2.8, 4.2, 41, 38, "Heavy on derivations. Many students study from past exams.", ["Tough grader"]],
+    "Anneliese Kowal": [4.5, 3.4, 91, 44, "Makes electricity and magnetism feel manageable. Great office hours.", ["Helpful", "Office hours"]],
+    "Beatrix Nwosu": [4.6, 3.2, 94, 102, "Organized slides and weekly practice sets. Labs are well run.", ["Organized", "Practice sets"]],
+    "Callum Ferrante": [3.3, 3.6, 60, 48, "Early lectures, dense content. The review sessions before exams help.", ["Dense"]],
+    "Solenne Arbour": [4.0, 4.1, 78, 57, "Organic chem is hard, but her mechanism videos are excellent.", ["Challenging", "Great videos"]],
+    "Idris Halvorsen": [3.1, 3.8, 52, 26, "Reads the textbook aloud. Exams are predictable.", ["Predictable exams"]],
+    "Fiona Castellane": [4.7, 2.8, 96, 83, "Enthusiastic and funny. Field examples make it stick.", ["Engaging", "Easy to follow"]],
+    "Rohan Delacroix": [3.7, 3.0, 72, 35, "Solid lectures. Lab reports are graded strictly.", ["Strict lab grading"]],
+    "Yara Stenholm": [4.3, 3.5, 87, 61, "Clear diagrams and fair quizzes. Keep up with readings.", ["Clear", "Readings matter"]],
+    "Emeric Tadesse": [3.4, 3.3, 63, 29, "Knowledgeable but monotone. Slides are posted early.", ["Slides posted"]],
+    "Wendell Asante": [4.1, 2.4, 86, 40, "Long evening lecture with great stories and easy exams.", ["Easy exams", "Evening"]],
 };
 
 export function sampleTerms()

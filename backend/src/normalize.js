@@ -10,7 +10,7 @@ export function parseDays(raw)
     for (const code of String(raw || "").match(/Mo|Tu|We|Th|Fr|Sa|Su/g) || [])
     {
         const day = DAY_CODES[code];
-        if (day && day !== "SUN" && !days.includes(day)) days.push(day);
+        if (day && !days.includes(day)) days.push(day);
     }
     return days;
 }

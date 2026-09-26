@@ -2,9 +2,9 @@ import { useMemo } from "react"
 import { motion } from "motion/react"
 import { GRID_MAX_HOUR, GRID_MIN_HOUR } from "@/config"
 import { courseColorVar } from "@/lib/colors"
-import { DAY_LABEL, DAY_SHORT, WEEKDAYS, formatRange, formatTime, fromMinutes, toMinutes } from "@/lib/time"
+import { ALL_DAYS, DAY_LABEL, DAY_SHORT, formatRange, formatTime, fromMinutes, toMinutes } from "@/lib/time"
 import { cn } from "@/lib/utils"
-import type { BusyBlock, Day, Prof, Section } from "@/types"
+import type { BusyBlock, Prof, Section } from "@/types"
 import { ClassBlock } from "@/components/schedule/ClassBlock"
 
 interface Props {
@@ -16,13 +16,18 @@ interface Props {
   onLoadProf: (name: string) => void
   onSwap?: (unitKey: string) => void
   dimmed?: boolean
+  changed?: Set<string> // section ids that differ from the best match
+  focusChanged?: boolean // fade everything that didn't change
 }
 
 // The grid fills whatever height it is given, so nothing scrolls. It does that by
 // positioning blocks as percentages of the day, and by only showing the hours that
 // actually contain something (rounded out to the hour, with a little air).
-export function WeekGrid({ sections, busy, courseOrder, conflicts, profs, onLoadProf, onSwap, dimmed }: Props) {
-  const { firstHour, lastHour, days } = useMemo(() => {
+export function WeekGrid({ sections, busy, courseOrder, conflicts, profs, onLoadProf, onSwap, dimmed, changed, focusChanged }: Props) {
+  // Always the full week: uOttawa does schedule Saturday and Sunday sections.
+  const days = ALL_DAYS
+
+  const { firstHour, lastHour } = useMemo(() => {
     const times = [
       ...sections.flatMap((s) => [toMinutes(s.start), toMinutes(s.end)]),
       ...busy.flatMap((b) => [toMinutes(b.start), toMinutes(b.end)]),
@@ -31,12 +36,9 @@ export function WeekGrid({ sections, busy, courseOrder, conflicts, profs, onLoad
     const start = times.length ? Math.floor(Math.min(...times) / 60) - 1 : 8
     const end = times.length ? Math.ceil(Math.max(...times) / 60) + 1 : 18
 
-    const needsSat = sections.some((s) => s.days.includes("SAT")) || busy.some((b) => b.day === "SAT")
-
     return {
       firstHour: Math.max(GRID_MIN_HOUR, Math.min(start, 9)),
       lastHour: Math.min(GRID_MAX_HOUR, Math.max(end, 17)),
-      days: (needsSat ? [...WEEKDAYS, "SAT"] : WEEKDAYS) as Day[],
     }
   }, [sections, busy])
 
@@ -128,7 +130,10 @@ export function WeekGrid({ sections, busy, courseOrder, conflicts, profs, onLoad
                   layout
                   layoutId={`${s.courseCode}-${s.type}-${day}`}
                   transition={{ type: "spring", stiffness: 420, damping: 36 }}
-                  className="absolute inset-x-1 z-10"
+                  className={cn(
+                    "absolute inset-x-1 z-10 transition-opacity duration-300",
+                    focusChanged && !changed?.has(s.id) && "opacity-30",
+                  )}
                   style={{ top: `${top(s.start)}%`, height: `${height(s.start, s.end)}%` }}
                 >
                   <ClassBlock
@@ -136,6 +141,7 @@ export function WeekGrid({ sections, busy, courseOrder, conflicts, profs, onLoad
                     day={day}
                     color={courseColorVar(s.courseCode, courseOrder)}
                     conflicted={conflicts.has(s.id)}
+                    changed={changed?.has(s.id) ?? false}
                     prof={s.prof ? profs[s.prof] : null}
                     onLoadProf={onLoadProf}
                     onSwap={onSwap}

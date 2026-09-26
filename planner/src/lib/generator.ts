@@ -1,7 +1,7 @@
 // Client-side copy of the backend's generator (backend/src/generator.js).
 // It powers the sample-data mode and stands in if the backend goes down mid-demo.
 // Keep the two in step: same vocabulary, same scoring, same tiebreakers.
-import type { Alternative, BusyBlock, Day, Preferences, Prof, Schedule, Section, Unit } from "@/types"
+import type { Alternative, BusyBlock, Day, Preferences, Prof, Schedule, Section, Unit, Unplaced, UnplacedReason } from "@/types"
 import { toMinutes } from "@/lib/time"
 
 const MAX_RESULTS = 5
@@ -101,29 +101,30 @@ export function generateSchedules({ courseCodes, sections, preferences, busy, pr
   const units = buildUnits(sections)
   const allowed = preferences.allowedStatus.length ? preferences.allowedStatus : ["OPEN", "WAITLIST"]
 
-  const unplaced: string[] = []
+  const unplaced: Unplaced[] = []
   const perCourse: { code: string; options: FullUnit[][] }[] = []
-  for (const code of courseCodes) {
+  for (const code of [...new Set(courseCodes)]) {
     const options = optionsForCourse(code, units, allowed, busy)
-    if (options.length === 0) unplaced.push(code)
+    if (options.length === 0) unplaced.push(whyNoOptions(code, units, allowed, busy))
     else perCourse.push({ code, options })
   }
 
   perCourse.sort((a, b) => a.options.length - b.options.length)
   let found = search(perCourse)
+  let blocked: { code: string; options: FullUnit[][] } | null = null
 
   if (found.length === 0 && perCourse.length > 1) {
     for (let i = 0; i < perCourse.length; i++) {
       const rest = search(perCourse.filter((_, j) => j !== i))
       if (rest.length > 0) {
-        unplaced.push(perCourse[i].code)
+        blocked = perCourse[i]
         found = rest
         break
       }
     }
   }
 
-  const scored = found.map((combo) => finish(combo, preferences, profs, [...new Set(unplaced)])).sort(compare)
+  const scored = found.map((combo) => finish(combo, preferences, profs)).sort(compare)
 
   // One tab per distinct set of lectures. Swapping a lab or DGD is its own decision.
   const byLectures = new Map<string, Ranked>()
@@ -136,9 +137,52 @@ export function generateSchedules({ courseCodes, sections, preferences, busy, pr
     if (!byLectures.has(key)) byLectures.set(key, schedule)
   }
 
+  // A blocked course clashes with different things in each schedule, so name them per schedule.
   return withAlternativeSecond([...byLectures.values()])
     .slice(0, MAX_RESULTS)
-    .map((s, i) => ({ ...s, id: `option-${i + 1}` }))
+    .map((s, i) => ({
+      ...s,
+      id: `option-${i + 1}`,
+      unplaced: blocked
+        ? [
+            ...unplaced,
+            { courseCode: blocked.code, reason: "CLASH" as const, conflictsWith: overlappedCourses(blocked.options, s.sections) },
+          ]
+        : unplaced,
+    }))
+}
+
+// Checked in the same order the filters run, so the first one that empties the list is the reason.
+function whyNoOptions(code: string, units: FullUnit[], allowed: string[], busy: BusyBlock[]): Unplaced {
+  const result = (reason: UnplacedReason, conflictsWith: string[] = []): Unplaced => ({ courseCode: code, reason, conflictsWith })
+
+  const mine = units.filter((u) => u.courseCode === code)
+  if (!mine.length) return result("NOT_OFFERED")
+
+  const usable = mine.filter((u) => allowed.includes(u.status))
+  if (!usable.length) {
+    const waitlisted = mine.some((u) => u.status === "WAITLIST") && !allowed.includes("WAITLIST")
+    return result(waitlisted ? "WAITLIST_ONLY" : "FULL")
+  }
+
+  if (optionsForCourse(code, units, allowed, []).length) {
+    const titles = busy
+      .filter((b) => usable.some((u) => u.sections.some((s) => hitsBusy(s, [b]))))
+      .map((b) => b.title || "a busy block")
+    return result("BUSY", [...new Set(titles)])
+  }
+
+  return result("CLASH")
+}
+
+function overlappedCourses(options: FullUnit[][], sections: Section[]): string[] {
+  const hit = new Set<string>()
+  for (const option of options) {
+    for (const s of option.flatMap((u) => u.sections)) {
+      for (const other of sections) if (sectionsOverlap(s, other)) hit.add(other.courseCode)
+    }
+  }
+  return [...hit].sort()
 }
 
 // Second slot: the close-scoring schedule that shares the fewest units with the best.
@@ -192,7 +236,7 @@ function search(perCourse: { code: string; options: FullUnit[][] }[]): FullUnit[
   return found
 }
 
-function finish(combo: FullUnit[], preferences: Preferences, profs: Record<string, Prof>, unplaced: string[]): Ranked {
+function finish(combo: FullUnit[], preferences: Preferences, profs: Record<string, Prof>): Ranked {
   const sections = combo.flatMap((u) => u.sections)
   const breakdown = scoreBreakdown(sections, preferences, profs)
   const w = preferences.weights
@@ -206,7 +250,7 @@ function finish(combo: FullUnit[], preferences: Preferences, profs: Record<strin
     units: combo.map(({ sections: _drop, ...unit }) => unit),
     score,
     breakdown,
-    unplaced,
+    unplaced: [],
     daysOnCampusCount: days.length,
     gapMinutes: totalGapMinutes(sections),
     missedDaysOff: preferences.daysOff.filter((d) => days.includes(d)).length,
@@ -252,7 +296,7 @@ export function totalGapMinutes(sections: Section[]): number {
 }
 
 export function daysOnCampus(sections: Section[]): Day[] {
-  const order: Day[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT"]
+  const order: Day[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
   const used = new Set(sections.flatMap((s) => s.days))
   return order.filter((d) => used.has(d))
 }
