@@ -41,7 +41,7 @@ function validateBody(body) {
   return errors;
 }
 
-router.post('/schedule', async (req, res) => {
+router.post('/', async (req, res) => {
   const errors = validateBody(req.body);
   if (errors.length > 0) {
     return res.status(400).json({ error: 'Invalid request body', details: errors });

@@ -15,7 +15,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/', scheduleRouter);
+app.use('/schedule', scheduleRouter);
 
 app.use((err, req, res, next) => {
   if (err.type === 'entity.parse.failed') {
