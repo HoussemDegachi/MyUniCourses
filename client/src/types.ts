@@ -11,7 +11,7 @@ export type SectionStatus = "OPEN" | "WAITLIST" | "CLOSED"
 export type ChosenStatus = "OPEN" | "WAITLIST"
 
 export interface Term {
-  id: string // e.g. "2026-fall"
+  id: number // e.g. "2026-fall"
   name: string // e.g. "Fall 2026"
   startDate: string // ISO date, first day of classes
   endDate: string // ISO date, last day of classes

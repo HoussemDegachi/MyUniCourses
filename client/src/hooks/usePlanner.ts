@@ -24,11 +24,13 @@ export const DEFAULT_PREFERENCES: Preferences = {
   weights: { prof: 50, time: 50, gaps: 50 },
   notes: [],
 }
+import termsData from "@/data/terms.json"
+
 
 export function usePlanner() {
   const [health, setHealth] = useState<Health | null>(null)
   const [terms, setTerms] = useState<Term[]>([])
-  const [termId, setTermId] = useState("")
+  const [termId, setTermId] = useState(0)
   const [courses, setCourses] = useState<Course[]>([])
   const [preferences, setPreferences] = useState<Preferences>(DEFAULT_PREFERENCES)
   const [prompt, setPrompt] = useState("")
@@ -51,14 +53,14 @@ export function usePlanner() {
 
   useEffect(() => {
     api.health().then(setHealth).catch(() => setHealth(null))
-
-    api
-      .getTerms()
-      .then((list) => {
-        setTerms(list)
-        if (list[0]) setTermId(list[0].id)
-      })
-      .catch((err) => toast.error(message(err, "Couldn't load terms.")))
+    setTerms(termsData.terms)
+    // api
+    //   .getTerms()
+    //   .then((list) => {
+    //     setTerms(list)
+    //     if (list[0]) setTermId(list[0].id)
+    //   })
+    //   .catch((err) => toast.error(message(err, "Couldn't load terms.")))
   }, [])
 
   const term = terms.find((t) => t.id === termId) ?? null

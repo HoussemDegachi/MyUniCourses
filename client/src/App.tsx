@@ -27,6 +27,8 @@ export default function App() {
   const sections = p.active?.sections ?? []
   const conflicts = useMemo(() => findConflicts(sections, p.busy), [sections, p.busy])
 
+  
+
   return (
     <MotionConfig reducedMotion="user">
       {/* On a laptop the page never scrolls: only the controls column does, and the

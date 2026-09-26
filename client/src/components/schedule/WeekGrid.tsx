@@ -2,7 +2,7 @@ import { useMemo } from "react"
 import { motion } from "motion/react"
 import { GRID_MAX_HOUR, GRID_MIN_HOUR } from "@/config"
 import { courseColorVar } from "@/lib/colors"
-import { DAY_LABEL, DAY_SHORT, WEEKDAYS, formatRange, formatTime, fromMinutes, toMinutes } from "@/lib/time"
+import { DAY_LABEL, DAY_SHORT, ALL_DAYS, formatRange, formatTime, fromMinutes, toMinutes } from "@/lib/time"
 import { cn } from "@/lib/utils"
 import type { BusyBlock, Day, Prof, Section } from "@/types"
 import { ClassBlock } from "@/components/schedule/ClassBlock"
@@ -36,7 +36,7 @@ export function WeekGrid({ sections, busy, courseOrder, conflicts, profs, onLoad
     return {
       firstHour: Math.max(GRID_MIN_HOUR, Math.min(start, 9)),
       lastHour: Math.min(GRID_MAX_HOUR, Math.max(end, 17)),
-      days: (needsSat ? [...WEEKDAYS, "SAT"] : WEEKDAYS) as Day[],
+      days: (needsSat ? [...ALL_DAYS, "SAT"] : ALL_DAYS) as Day[],
     }
   }, [sections, busy])
 

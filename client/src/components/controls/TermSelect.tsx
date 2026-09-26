@@ -9,6 +9,7 @@ interface Props {
 }
 
 export function TermSelect({ terms, value, onChange }: Props) {
+
   return (
     <div className="grid grid-cols-1 gap-2">
       <Label htmlFor="term">Term</Label>
