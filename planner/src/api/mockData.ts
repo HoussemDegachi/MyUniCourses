@@ -22,7 +22,16 @@ export const TERMS: Term[] = [
   },
 ]
 
-export const COURSES: Course[] = [
+// Same map as backend/src/prerequisites.js. Each inner list means "any one of these".
+const PREREQUISITES: Record<string, string[][]> = {
+  ITI1121: [["ITI1120"]],
+  MAT1322: [["MAT1320", "MAT1330"]],
+  MAT1332: [["MAT1330", "MAT1320"]],
+  PHY1122: [["PHY1121"]],
+  CHM1321: [["CHM1311"]],
+}
+
+const COURSE_LIST: Omit<Course, "prerequisites">[] = [
   { code: "ITI1120", title: "Introduction to Computing I", credits: 3 },
   { code: "ITI1121", title: "Introduction to Computing II", credits: 3 },
   { code: "MAT1320", title: "Calculus I", credits: 3 },
@@ -46,6 +55,8 @@ export const COURSES: Course[] = [
   { code: "SOC1101", title: "Introduction to Sociology", credits: 3 },
   { code: "ECO1104", title: "Introduction to Microeconomics", credits: 3 },
 ]
+
+export const COURSES: Course[] = COURSE_LIST.map((c) => ({ ...c, prerequisites: PREREQUISITES[c.code] ?? [] }))
 
 // Program sequences for the "suggested courses" button. Hardcoded for the demo.
 export const SEQUENCES: Record<string, { label: string; byTerm: Record<string, string[]> }> = {

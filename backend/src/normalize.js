@@ -1,6 +1,8 @@
 // Turns the scraper's raw section objects into the shape the frontend expects.
 // See planner/src/types.ts. Any change here must be mirrored there.
 
+import { prerequisitesFor } from "./prerequisites.js";
+
 const DAY_CODES = { Mo: "MON", Tu: "TUE", We: "WED", Th: "THU", Fr: "FRI", Sa: "SAT", Su: "SUN" };
 
 // "MoWeFr" -> ["MON", "WED", "FRI"]
@@ -93,7 +95,7 @@ export function toCourses(scraped)
     {
         const code = String(entry.course || "").replace(/\s+/g, "").toUpperCase();
         if (!code || seen.has(code)) continue;
-        seen.set(code, { code, title: entry.title || code, credits: 3 });
+        seen.set(code, { code, title: entry.title || code, credits: 3, prerequisites: prerequisitesFor(code) });
     }
     return [...seen.values()];
 }

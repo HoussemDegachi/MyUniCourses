@@ -22,6 +22,9 @@ export interface Course {
   code: string // "ITI1120"
   title: string
   credits: number
+  // Each inner list is one requirement; passing any course in it satisfies it.
+  // [["MAT1320", "MAT1330"]] means MAT1320 or MAT1330. Empty means none we know of.
+  prerequisites: string[][]
 }
 
 // One meeting pattern of one component (a lecture, a DGD, a lab...).

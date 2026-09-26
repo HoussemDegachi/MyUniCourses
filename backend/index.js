@@ -21,6 +21,8 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const APP_NAME = process.env.APP_NAME || "Profound";
 const PROF_TTL = 7 * 24 * 60 * 60 * 1000;
+// A full-time uOttawa load is five courses a term. Matches MAX_COURSES in planner/src/config.ts.
+const MAX_COURSES = 5;
 
 app.use(cors({ origin: (process.env.CORS_ORIGIN || "http://localhost:5173").split(","), credentials: false }));
 app.use(express.json({ limit: "1mb" }));
@@ -193,6 +195,10 @@ app.post("/api/schedules/generate", route(async (req, res) =>
     const { termId, courseCodes = [], preferences, busy = [] } = req.body || {};
     if (!termId) return res.status(400).json({ error: "termId is required" });
     if (!courseCodes.length) return res.json([]);
+    if (new Set(courseCodes).size > MAX_COURSES)
+    {
+        return res.status(400).json({ error: `You can build with up to ${MAX_COURSES} courses at a time. Remove one and try again.` });
+    }
 
     const sections = await sectionsFor(String(termId), courseCodes.map(c => String(c).toUpperCase()));
     const profs = await profMap(sections);

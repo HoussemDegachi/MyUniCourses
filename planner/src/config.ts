@@ -16,6 +16,9 @@ export const AUTH_CONFIGURED = Boolean(AUTH0_DOMAIN && AUTH0_CLIENT_ID && AUTH0_
 // Asking Google for calendar permission at sign-in, so we never have to ask twice.
 export const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar"
 
+// A full-time uOttawa load is five courses a term. Matches MAX_COURSES in backend/index.js.
+export const MAX_COURSES = 5
+
 // The best match plus one alternative. The generator still ranks more than this.
 export const SHOWN_SCHEDULES = 2
 

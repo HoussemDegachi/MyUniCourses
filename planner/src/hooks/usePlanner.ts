@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { api, ApiError } from "@/api/client"
-import { SHOWN_SCHEDULES } from "@/config"
+import { MAX_COURSES, SHOWN_SCHEDULES } from "@/config"
+import { prereqNote, prereqText } from "@/lib/prerequisites"
 import type {
   Alternative,
   BusyBlock,
@@ -75,9 +76,20 @@ export function usePlanner() {
     setGeneratedKey(null)
   }, [])
 
-  const addCourse = useCallback((c: Course) => {
-    setCourses((prev) => (prev.some((p) => p.code === c.code) ? prev : [...prev, c]))
-  }, [])
+  const addCourse = useCallback(
+    (c: Course) => {
+      if (courses.some((p) => p.code === c.code)) return
+      if (courses.length >= MAX_COURSES) {
+        toast.error(`You can take up to ${MAX_COURSES} courses at once. Remove one to add ${c.code}.`)
+        return
+      }
+      const next = [...courses, c]
+      setCourses(next)
+      const note = prereqNote(c, next)
+      if (note) toast.warning(prereqText(c, note))
+    },
+    [courses],
+  )
 
   const removeCourse = useCallback((code: string) => {
     setCourses((prev) => prev.filter((c) => c.code !== code))
@@ -97,13 +109,35 @@ export function usePlanner() {
           .map((code) => found.flat().find((c) => c.code === code))
           .filter((c): c is Course => Boolean(c))
 
-        setCourses((prev) => [...prev, ...matched.filter((m) => !prev.some((p) => p.code === m.code))])
-        toast.success(`Added ${matched.length} suggested courses.`)
+        const fresh = matched.filter((m) => !courses.some((p) => p.code === m.code))
+        const room = Math.max(0, MAX_COURSES - courses.length)
+        const added = fresh.slice(0, room)
+        const left = fresh.slice(room)
+
+        if (!added.length) {
+          toast.error(`You already have ${MAX_COURSES} courses, the most you can take at once. Remove some first.`)
+          return
+        }
+
+        const next = [...courses, ...added]
+        setCourses(next)
+
+        const withPrereqs = added.filter((c) => prereqNote(c, next))
+        const notes = [
+          left.length &&
+            `${left.map((c) => c.code).join(", ")} ${left.length === 1 ? "was" : "were"} left out, since ${MAX_COURSES} courses is the most at once.`,
+          withPrereqs.length &&
+            `${withPrereqs.map((c) => c.code).join(", ")} ${withPrereqs.length === 1 ? "has" : "have"} prerequisites. Check the note under each course.`,
+        ].filter(Boolean)
+
+        toast.success(`Added ${added.length} suggested course${added.length === 1 ? "" : "s"}.`, {
+          description: notes.length ? notes.join(" ") : undefined,
+        })
       } catch (err) {
         toast.error(message(err, "Couldn't load suggested courses."))
       }
     },
-    [termId],
+    [termId, courses],
   )
 
   const readPrompt = useCallback(async () => {
