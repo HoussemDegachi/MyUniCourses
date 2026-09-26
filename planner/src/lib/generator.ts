@@ -8,6 +8,7 @@ const MAX_RESULTS = 5
 const MAX_EXPLORED = 200_000
 const WALKING_MINUTES = 30
 const GAP_BUDGET = 900
+const ALT_SCORE_SLACK = 15
 
 const STATUS_RANK: Record<string, number> = { OPEN: 0, WAITLIST: 1, CLOSED: 2 }
 
@@ -135,7 +136,30 @@ export function generateSchedules({ courseCodes, sections, preferences, busy, pr
     if (!byLectures.has(key)) byLectures.set(key, schedule)
   }
 
-  return [...byLectures.values()].slice(0, MAX_RESULTS).map((s, i) => ({ ...s, id: `option-${i + 1}` }))
+  return withAlternativeSecond([...byLectures.values()])
+    .slice(0, MAX_RESULTS)
+    .map((s, i) => ({ ...s, id: `option-${i + 1}` }))
+}
+
+// Second slot: the close-scoring schedule that shares the fewest units with the best.
+function withAlternativeSecond(ranked: Ranked[]): Ranked[] {
+  if (ranked.length < 3) return ranked
+  const [best, ...rest] = ranked
+  const bestKeys = new Set(best.units.map((u) => u.key))
+
+  let pick: Ranked | null = null
+  let pickDiff = -1
+  for (const s of rest) {
+    if (s.score < best.score - ALT_SCORE_SLACK || s.missedDaysOff > best.missedDaysOff) continue
+    const diff = s.units.filter((u) => !bestKeys.has(u.key)).length / s.units.length
+    if (diff > pickDiff) {
+      pick = s
+      pickDiff = diff
+    }
+  }
+
+  if (!pick) return ranked
+  return [best, pick, ...rest.filter((s) => s !== pick)]
 }
 
 function compare(a: Ranked, b: Ranked) {

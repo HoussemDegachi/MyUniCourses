@@ -16,6 +16,9 @@ export const AUTH_CONFIGURED = Boolean(AUTH0_DOMAIN && AUTH0_CLIENT_ID && AUTH0_
 // Asking Google for calendar permission at sign-in, so we never have to ask twice.
 export const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar"
 
+// The best match plus one alternative. The generator still ranks more than this.
+export const SHOWN_SCHEDULES = 2
+
 // The grid never shows a wider day than this, and never a narrower one.
 export const GRID_MIN_HOUR = 8
 export const GRID_MAX_HOUR = 22

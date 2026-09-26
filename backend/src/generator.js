@@ -10,6 +10,7 @@ const MAX_RESULTS = 5;
 const MAX_EXPLORED = 200000;
 const WALKING_MINUTES = 30; // a gap shorter than this is just getting between buildings
 const GAP_BUDGET = 900; // 15 hours of weekly gaps scores zero
+const ALT_SCORE_SLACK = 15; // how far below the best the alternative may score
 
 const toMinutes = t => { const [h, m] = String(t).split(":").map(Number); return h * 60 + m; };
 const STATUS_RANK = { OPEN: 0, WAITLIST: 1, CLOSED: 2 };
@@ -130,9 +131,37 @@ export function generateSchedules({ courseCodes, sections, preferences, busy = [
         if (!byLectures.has(key)) byLectures.set(key, schedule);
     }
 
-    return [...byLectures.values()]
+    return withAlternativeSecond([...byLectures.values()])
         .slice(0, MAX_RESULTS)
         .map((s, i) => ({ ...s, id: `option-${i + 1}` }));
+}
+
+// The second slot is the alternative. The runner-up is usually the best schedule
+// with one lecture moved, which is not a real choice. Instead take the schedule
+// that shares the fewest units with the best, among those that still score close
+// and keep every day off the best one keeps.
+function withAlternativeSecond(ranked)
+{
+    if (ranked.length < 3) return ranked;
+    const [best, ...rest] = ranked;
+    const bestKeys = new Set(best.units.map(u => u.key));
+
+    let pick = null;
+    let pickDiff = -1;
+    for (const s of rest)
+    {
+        if (s.score < best.score - ALT_SCORE_SLACK || s.missedDaysOff > best.missedDaysOff) continue;
+        const diff = s.units.filter(u => !bestKeys.has(u.key)).length / s.units.length;
+        // rest is already ranked, so strictly greater keeps the higher score on ties.
+        if (diff > pickDiff)
+        {
+            pick = s;
+            pickDiff = diff;
+        }
+    }
+
+    if (!pick) return ranked;
+    return [best, pick, ...rest.filter(s => s !== pick)];
 }
 
 // Same score happens often, so break ties on things students actually feel:

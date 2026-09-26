@@ -5,6 +5,7 @@ import { AccountButton } from "@/components/auth/AccountButton"
 import { CourseSearch } from "@/components/controls/CourseSearch"
 import { PreferencePanel } from "@/components/controls/PreferencePanel"
 import { PromptBox } from "@/components/controls/PromptBox"
+import { ScrollPanel } from "@/components/controls/ScrollPanel"
 import { TermSelect } from "@/components/controls/TermSelect"
 import { CalendarActions } from "@/components/ics/CalendarActions"
 import { EmptyState } from "@/components/schedule/EmptyState"
@@ -37,7 +38,7 @@ export default function App() {
         <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 px-4 pb-4 lg:grid-cols-[350px_minmax(0,1fr)] lg:gap-6 lg:px-6">
           {/* Controls. This is the one scrolling region. */}
           <aside className="flex flex-col rounded-xl border lg:min-h-0 lg:overflow-hidden">
-            <div className="flex flex-col gap-6 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+            <ScrollPanel className="flex flex-col gap-6 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
               <TermSelect terms={p.terms} value={p.termId} onChange={p.changeTerm} />
               <CourseSearch
                 termId={p.termId}
@@ -57,7 +58,7 @@ export default function App() {
                 available={p.health?.gemini ?? true}
               />
               <PreferencePanel value={p.preferences} onChange={p.setPreferences} animateKey={p.parseCount} />
-            </div>
+            </ScrollPanel>
 
             <div className="shrink-0 border-t p-3">
               <Button

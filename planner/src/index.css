@@ -152,6 +152,22 @@
   background-color: color-mix(in oklab, var(--busy) 25%, transparent);
 }
 
+/* Controls column scrollbar. Invisible at rest, ink-grey when you hover the
+   panel, garnet while you are actually scrolling. */
+.themed-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  scrollbar-gutter: stable;
+  transition: scrollbar-color 0.35s ease;
+}
+.themed-scroll:hover {
+  scrollbar-color: var(--input) transparent;
+}
+.themed-scroll[data-scrolling] {
+  scrollbar-color: var(--primary) transparent;
+  transition-duration: 0.12s;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { api, ApiError } from "@/api/client"
+import { SHOWN_SCHEDULES } from "@/config"
 import type {
   Alternative,
   BusyBlock,
@@ -150,12 +151,15 @@ export function usePlanner() {
     setExplanations({})
 
     try {
-      const result = await api.generate({
-        termId,
-        courseCodes: courses.map((c) => c.code),
-        preferences,
-        busy,
-      })
+      // Slicing here, not in the view, so Gemini only writes up what is shown.
+      const result = (
+        await api.generate({
+          termId,
+          courseCodes: courses.map((c) => c.code),
+          preferences,
+          busy,
+        })
+      ).slice(0, SHOWN_SCHEDULES)
 
       setSchedules(result)
       setActiveId(result[0]?.id ?? "")
