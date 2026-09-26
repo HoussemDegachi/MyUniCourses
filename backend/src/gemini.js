@@ -4,7 +4,7 @@
 // It never invents ratings, times or scores. Anything factual is computed in
 // generator.js and passed in, so the model can only phrase what is already true.
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
 export const geminiEnabled = () => Boolean(process.env.GEMINI_API_KEY);
