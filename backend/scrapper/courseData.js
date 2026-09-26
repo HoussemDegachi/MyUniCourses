@@ -189,14 +189,22 @@ function toSectionList(result, term)
             });
         }
     }
-    return sections;
+    return sections;    
 }
 
 // Flat list of sections as a JSON string, one entry per section
-export async function getCourseJSON(term, subject, number, pretty = true)
+async function getOneCourseJSON(term, subject, number, pretty = true)
 {
     const sections = toSectionList(await searchCourse(term, subject, number), term);
-    return JSON.stringify(sections, null, pretty ? 2 : 0);
+    return sections
+}
+
+export async function getCoursesJSON(term, subjects) {
+    const res = {}
+    for (let fullSubjectName of subjects) {
+        res[fullSubjectName] = await getOneCourseJSON(term, fullSubjectName.split(" ")[0], fullSubjectName.split(" ")[1])
+    }
+    return res
 }
 
 // if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
