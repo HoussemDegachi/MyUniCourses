@@ -112,6 +112,7 @@ function parseResults($)
                 times: lines($, $(`[id='MTG_DAYTIME$${i}']`)),
                 instructors: lines($, $(`[id='MTG_INSTR$${i}']`)),
                 dates: lines($, $(`[id='MTG_TOPIC$${i}']`)),
+                rooms: lines($, $(`[id='MTG_ROOM$${i}']`)),
             });
         });
 
@@ -121,7 +122,7 @@ function parseResults($)
     return { message: courses.length ? "" : message, courses };
 }
 
-async function getTerms()
+export async function getTerms()
 {
     const $ = await openSearchPage(new Session());
     return $("select[id='CLASS_SRCH_WRK2_STRM$35$'] option")
@@ -132,6 +133,9 @@ async function getTerms()
 
 async function searchCourse(term, subject, number)
 {
+    // An empty number means "every course in this subject", which needs the
+    // "contains" match type instead of "exact".
+    const hasNumber = String(number ?? "").trim().length > 0;
     const session = new Session();
     const $ = await openSearchPage(session);
     const fields = readForm($);
@@ -139,8 +143,8 @@ async function searchCourse(term, subject, number)
         "ICAction": "CLASS_SRCH_WRK2_SSR_PB_CLASS_SRCH",
         "CLASS_SRCH_WRK2_STRM$35$": term,
         "SSR_CLSRCH_WRK_SUBJECT$0": subject.toUpperCase(),
-        "SSR_CLSRCH_WRK_SSR_EXACT_MATCH1$0": "E",
-        "SSR_CLSRCH_WRK_CATALOG_NBR$0": number,
+        "SSR_CLSRCH_WRK_SSR_EXACT_MATCH1$0": hasNumber ? "E" : "C",
+        "SSR_CLSRCH_WRK_CATALOG_NBR$0": hasNumber ? String(number).trim() : "",
         "SSR_CLSRCH_WRK_SSR_OPEN_ONLY$chk$0": "N",
     });
     delete fields["SSR_CLSRCH_WRK_SSR_OPEN_ONLY$0"];
@@ -154,7 +158,7 @@ async function searchCourse(term, subject, number)
 }
 
 // "Tu 17:30 - 18:50" + "Staff" + "2027-01-11 - 2027-04-14" -> one meeting object
-function toMeeting(time, instructor, dates)
+function toMeeting(time, instructor, dates, room)
 {
     const t = time.match(/^(\S+)\s+(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})$/);
     const d = (dates || "").match(/^(\d{4}-\d{2}-\d{2})\s*-\s*(\d{4}-\d{2}-\d{2})$/);
@@ -165,6 +169,7 @@ function toMeeting(time, instructor, dates)
         instructor: instructor || null,
         startDate: d ? d[1] : null,
         endDate: d ? d[2] : null,
+        room: room && !/^tba$/i.test(room) ? room : null,
     };
 }
 
@@ -185,29 +190,28 @@ function toSectionList(result, term)
                 component: s.component,
                 status: s.status,
                 open: s.status.toLowerCase() === "open",
-                meetings: s.times.map((time, i) => toMeeting(time, s.instructors[i], s.dates[i])),
+                meetings: s.times.map((time, i) => toMeeting(time, s.instructors[i], s.dates[i], s.rooms?.[i])),
             });
         }
     }
-    return sections;    
+    return sections;
+}
+
+// Flat list of sections, one entry per section. Throws if uoCampus is unreachable.
+export async function getSections(term, subject, number)
+{
+    return toSectionList(await searchCourse(term, subject, number), term);
+}
+
+// Every course in a subject for a term, used to power course search.
+export async function getSubjectSections(term, subject)
+{
+    return toSectionList(await searchCourse(term, subject, ""), term);
 }
 
 // Flat list of sections as a JSON string, one entry per section
-async function getOneCourseJSON(term, subject, number, pretty = true)
+export async function getCourseJSON(term, subject, number, pretty = true)
 {
     const sections = toSectionList(await searchCourse(term, subject, number), term);
-    return sections
+    return JSON.stringify(sections, null, pretty ? 2 : 0);
 }
-
-export async function getCoursesJSON(term, subjects) {
-    const res = {}
-    for (let fullSubjectName of subjects) {
-        res[fullSubjectName] = await getOneCourseJSON(term, fullSubjectName.split(" ")[0], fullSubjectName.split(" ")[1])
-    }
-    return res
-}
-
-// if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
-// {
-//     getCourseJSON(2269, "ITI", 1120).then((res) => console.log(res))
-// }
