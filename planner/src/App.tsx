@@ -137,6 +137,7 @@ export default function App() {
                 dimmed={p.generating}
                 changed={comparison?.changedSectionIds}
                 focusChanged={showChanges && Boolean(comparison)}
+                buildId={p.buildId}
               />
 
               {p.generating && (

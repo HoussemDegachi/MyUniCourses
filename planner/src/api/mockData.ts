@@ -54,6 +54,7 @@ const COURSE_LIST: Omit<Course, "prerequisites">[] = [
   { code: "PSY1102", title: "Introduction to Psychology: Applications", credits: 3 },
   { code: "SOC1101", title: "Introduction to Sociology", credits: 3 },
   { code: "ECO1104", title: "Introduction to Microeconomics", credits: 3 },
+  { code: "CRM1300", title: "Introduction to Criminology", credits: 3 },
 ]
 
 export const COURSES: Course[] = COURSE_LIST.map((c) => ({ ...c, prerequisites: PREREQUISITES[c.code] ?? [] }))
@@ -235,6 +236,21 @@ export const SECTIONS: Section[] = [
   // ECO1104
   sec("ECO1104", "A00", "LEC", ["TUE", "THU"], "13:00", "14:20", "Leila Mansour", "OPEN", "DMS 1140"),
   sec("ECO1104", "B00", "LEC", ["MON"], "18:00", "20:50", "Brendan Kowalski", "OPEN", "DMS 1140"),
+
+  // Waitlisted sections at good times, so demo schedules actually include some.
+  sec("ITI1120", "A04", "DGD", ["WED"], "10:00", "11:20", null, "WAITLIST", "CRX C240"),
+  sec("ITI1100", "A02", "LAB", ["THU"], "16:00", "18:50", null, "WAITLIST", "STE 0131"),
+  sec("MAT1320", "B03", "DGD", ["WED"], "14:30", "15:50", null, "WAITLIST", "DMS 1140"),
+  sec("MAT1341", "A02", "DGD", ["WED"], "11:30", "12:50", null, "WAITLIST", "FSS 2005"),
+  sec("MAT1348", "B03", "DGD", ["THU"], "14:30", "15:50", null, "WAITLIST", "CRX C240"),
+  sec("ITI1121", "A02", "LAB", ["WED"], "13:00", "15:50", null, "WAITLIST", "STE 2060"),
+  sec("MAT1322", "A02", "DGD", ["THU"], "11:30", "12:50", null, "WAITLIST", "STE B0138"),
+  sec("PHY1121", "A03", "LAB", ["WED"], "13:00", "15:50", null, "WAITLIST", "MCD 146"),
+  sec("BIO1130", "A02", "LAB", ["THU"], "13:00", "15:50", null, "WAITLIST", "GNN 110"),
+  sec("PSY1101", "C00", "LEC", ["TUE", "THU"], "10:00", "11:20", "Colette Beaumont", "WAITLIST", "DMS 1140"),
+  sec("ECO1104", "C00", "LEC", ["WED", "FRI"], "10:00", "11:20", "Leila Mansour", "WAITLIST", "DMS 1140"),
+  sec("CRM1300", "A00", "LEC", ["MON", "WED"], "11:30", "12:50", "Harriet Oduya", "WAITLIST", "FSS 1005"),
+  sec("CRM1300", "B00", "LEC", ["TUE"], "18:00", "20:50", "Lucien Ferreol", "WAITLIST", "FSS 1005"),
 ]
 
 export const PROFS: Record<string, Prof> = {
@@ -272,6 +288,8 @@ export const PROFS: Record<string, Prof> = {
   "Yara Stenholm": p("Yara Stenholm", 4.3, 3.5, 87, 61, "Clear diagrams and fair quizzes. Keep up with readings.", ["Clear", "Readings matter"]),
   "Emeric Tadesse": p("Emeric Tadesse", 3.4, 3.3, 63, 29, "Knowledgeable but monotone. Slides are posted early.", ["Slides posted"]),
   "Wendell Asante": p("Wendell Asante", 4.1, 2.4, 86, 40, "Long evening lecture with great stories and easy exams.", ["Easy exams", "Evening"]),
+  "Harriet Oduya": p("Harriet Oduya", 4.6, 2.7, 93, 118, "So popular it fills every term. Case studies make every lecture interesting.", ["Engaging", "Fills fast"]),
+  "Lucien Ferreol": p("Lucien Ferreol", 3.8, 2.4, 74, 30, "Long evening lecture, but fair exams and clear slides.", ["Evening", "Fair exams"]),
   // Noor Castellvi has no ratings on purpose
 }
 

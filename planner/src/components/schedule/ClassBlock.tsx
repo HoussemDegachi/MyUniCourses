@@ -14,6 +14,9 @@ interface Props {
   color: string
   conflicted: boolean
   changed: boolean
+  draw: boolean // play the highlighter stroke when this block first appears
+  drawDelay: number // ms, so a fresh week fills in one stroke after another
+  onHoverCourse: (courseCode: string | null) => void
   prof: Prof | null | undefined // undefined means still loading
   onLoadProf: (name: string) => void
   onSwap?: (unitKey: string) => void
@@ -27,7 +30,19 @@ const TYPE_LABEL: Record<string, string> = {
   SEM: "Seminar",
 }
 
-export function ClassBlock({ section, day, color, conflicted, changed, prof, onLoadProf, onSwap }: Props) {
+export function ClassBlock({
+  section,
+  day,
+  color,
+  conflicted,
+  changed,
+  draw,
+  drawDelay,
+  onHoverCourse,
+  prof,
+  onLoadProf,
+  onSwap,
+}: Props) {
   const ref = useRef<HTMLButtonElement>(null)
   const [size, setSize] = useState({ h: 0, w: 0 })
 
@@ -46,26 +61,51 @@ export function ClassBlock({ section, day, color, conflicted, changed, prof, onL
   const showRoom = size.h >= 62 && size.w >= 90
 
   return (
-    <HoverCard openDelay={120} closeDelay={80} onOpenChange={(open) => open && section.prof && onLoadProf(section.prof)}>
+    <HoverCard
+      openDelay={120}
+      closeDelay={80}
+      onOpenChange={(open) => open && section.prof && onLoadProf(section.prof)}
+    >
       <HoverCardTrigger asChild>
         <button
           ref={ref}
           type="button"
           className={cn(
-            "highlight relative h-full w-full overflow-hidden px-1.5 py-0.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            conflicted && "ring-2 ring-destructive",
+            "ink h-full w-full overflow-hidden px-1.5 py-0.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            draw && "ink-draw",
           )}
-          style={{ ["--hl" as string]: color }}
+          data-type={section.type}
+          data-waitlist={section.status === "WAITLIST" || undefined}
+          data-conflict={conflicted || undefined}
+          style={{
+            ["--hl" as string]: color,
+            ["--draw-delay" as string]: `${drawDelay}ms`,
+          }}
+          onMouseEnter={() => onHoverCourse(section.courseCode)}
+          onMouseLeave={() => onHoverCourse(null)}
+          onFocus={() => onHoverCourse(section.courseCode)}
+          onBlur={() => onHoverCourse(null)}
           aria-label={`${section.courseCode} ${TYPE_LABEL[section.type] ?? section.type}, ${DAY_LABEL[day]} ${formatRange(section.start, section.end)}${section.prof ? `, ${section.prof}` : ""}${changed ? ", differs from your best match" : ""}`}
         >
-          {changed && <span aria-hidden className="absolute right-1 bottom-1 size-1.5 rounded-full bg-current opacity-80" />}
-          <span className="flex items-baseline gap-1 text-[12px] leading-tight font-bold">
+          {changed && (
+            <span aria-hidden className="absolute right-1 bottom-1 size-1.5 rounded-full bg-current opacity-80" />
+          )}
+          {/* Positioned so the text sits above the texture layer. */}
+          <span className="relative flex items-baseline gap-1 text-[12px] leading-tight font-bold">
             <span className="truncate">{section.courseCode}</span>
             <span className="shrink-0 text-[10px] font-medium opacity-70">{section.type}</span>
-            {section.status === "WAITLIST" && <span className="ml-auto shrink-0 text-[9px] font-bold opacity-80">WL</span>}
+            {section.status === "WAITLIST" && (
+              <span className="ml-auto shrink-0 text-[9px] font-bold opacity-80">WL</span>
+            )}
           </span>
-          {showTime && <span className="block text-[10px] leading-tight opacity-80 tabular">{formatRange(section.start, section.end)}</span>}
-          {showRoom && section.location && <span className="block truncate text-[10px] leading-tight opacity-70">{section.location}</span>}
+          {showTime && (
+            <span className="relative block text-[10px] leading-tight opacity-80 tabular">
+              {formatRange(section.start, section.end)}
+            </span>
+          )}
+          {showRoom && section.location && (
+            <span className="relative block truncate text-[10px] leading-tight opacity-70">{section.location}</span>
+          )}
         </button>
       </HoverCardTrigger>
 
@@ -88,9 +128,7 @@ export function ClassBlock({ section, day, color, conflicted, changed, prof, onL
           </div>
 
           {!section.prof ? (
-            <p className="text-sm text-muted-foreground">
-              No instructor listed. DGDs and labs are usually run by TAs.
-            </p>
+            <p className="text-sm text-muted-foreground">No instructor listed. DGDs and labs are usually run by TAs.</p>
           ) : prof === undefined ? (
             <div className="grid gap-2 border-t pt-3">
               <Skeleton className="h-4 w-32" />
@@ -109,7 +147,8 @@ export function ClassBlock({ section, day, color, conflicted, changed, prof, onL
               </div>
               <p className="text-xs text-muted-foreground tabular">
                 Difficulty {prof.difficulty?.toFixed(1) ?? "unknown"}
-                {prof.wouldTakeAgain != null ? `, ${prof.wouldTakeAgain}% would take again` : ""}, {prof.numRatings} ratings
+                {prof.wouldTakeAgain != null ? `, ${prof.wouldTakeAgain}% would take again` : ""}, {prof.numRatings}{" "}
+                ratings
               </p>
               {prof.summary && <p className="text-sm leading-relaxed">{prof.summary}</p>}
               {prof.tags.length > 0 && (

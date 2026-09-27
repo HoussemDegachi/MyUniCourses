@@ -43,6 +43,7 @@ export function usePlanner() {
   const [explaining, setExplaining] = useState(false)
   const [profs, setProfs] = useState<Record<string, Prof | null>>({})
   const [generatedKey, setGeneratedKey] = useState<string | null>(null)
+  const [buildId, setBuildId] = useState(0) // bumps on every build, so the grid redraws
 
   // Swapping one lab or DGD without touching the rest of the week.
   const [swapKey, setSwapKey] = useState<string | null>(null)
@@ -196,6 +197,7 @@ export function usePlanner() {
       ).slice(0, SHOWN_SCHEDULES)
 
       setSchedules(result)
+      setBuildId((n) => n + 1)
       setActiveId(result[0]?.id ?? "")
       setGeneratedKey(currentKey)
 
@@ -303,6 +305,7 @@ export function usePlanner() {
     busy,
     importBusy,
     schedules,
+    buildId,
     active,
     activeId,
     setActiveId,

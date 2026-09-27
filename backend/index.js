@@ -21,8 +21,8 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 const APP_NAME = process.env.APP_NAME || "Profound";
 const PROF_TTL = 7 * 24 * 60 * 60 * 1000;
-// A full-time uOttawa load is five courses a term. Matches MAX_COURSES in planner/src/config.ts.
-const MAX_COURSES = 5;
+// Most courses a student can plan at once. Matches MAX_COURSES in planner/src/config.ts.
+const MAX_COURSES = 6;
 
 app.use(cors({ origin: (process.env.CORS_ORIGIN || "http://localhost:5173").split(","), credentials: false }));
 app.use(express.json({ limit: "1mb" }));

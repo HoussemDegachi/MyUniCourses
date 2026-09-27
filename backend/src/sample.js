@@ -112,6 +112,21 @@ const RAW = [
     ["ECO1102", "Introduction to Macroeconomics", "B00", "LEC", "Tu", "18:00", "20:50", "Brendan Kowalski", "Open", "DMS 1140"],
     ["ENG1112", "Technical Report Writing", "A00", "LEC", "We", "17:30", "20:20", "Maya Singh", "Open", "CRX C240"],
     ["ENG1112", "Technical Report Writing", "B00", "LEC", "Th", "08:30", "11:20", "Hugo Lefebvre", "Open", "CRX C240"],
+
+    // Waitlisted sections at good times, so demo schedules actually include some.
+    ["ITI1120", "Introduction to Computing I", "A04", "DGD", "We", "10:00", "11:20", null, "Wait List", "CRX C240"],
+    ["ITI1100", "Digital Systems I", "A02", "LAB", "Th", "16:00", "18:50", null, "Wait List", "STE 0131"],
+    ["MAT1320", "Calculus I", "B03", "DGD", "We", "14:30", "15:50", null, "Wait List", "DMS 1140"],
+    ["MAT1341", "Introduction to Linear Algebra", "A02", "DGD", "We", "11:30", "12:50", null, "Wait List", "FSS 2005"],
+    ["MAT1348", "Discrete Mathematics for Computing", "B03", "DGD", "Th", "14:30", "15:50", null, "Wait List", "CRX C240"],
+    ["ITI1121", "Introduction to Computing II", "A02", "LAB", "We", "13:00", "15:50", null, "Wait List", "STE 2060"],
+    ["MAT1322", "Calculus II", "A02", "DGD", "Th", "11:30", "12:50", null, "Wait List", "STE B0138"],
+    ["PHY1121", "Fundamentals of Physics I", "A03", "LAB", "We", "13:00", "15:50", null, "Wait List", "MCD 146"],
+    ["BIO1130", "Introduction to Organismal Biology", "A02", "LAB", "Th", "13:00", "15:50", null, "Wait List", "GNN 110"],
+    ["PSY1101", "Introduction to Psychology: Foundations", "C00", "LEC", "TuTh", "10:00", "11:20", "Colette Beaumont", "Wait List", "DMS 1140"],
+    ["ECO1104", "Introduction to Microeconomics", "C00", "LEC", "WeFr", "10:00", "11:20", "Leila Mansour", "Wait List", "DMS 1140"],
+    ["CRM1300", "Introduction to Criminology", "A00", "LEC", "MoWe", "11:30", "12:50", "Harriet Oduya", "Wait List", "FSS 1005"],
+    ["CRM1300", "Introduction to Criminology", "B00", "LEC", "Tu", "18:00", "20:50", "Lucien Ferreol", "Wait List", "FSS 1005"],
 ];
 
 // Prof names here are invented. Never show a real prof beside a made-up rating.
@@ -149,6 +164,8 @@ const PROFS = {
     "Yara Stenholm": [4.3, 3.5, 87, 61, "Clear diagrams and fair quizzes. Keep up with readings.", ["Clear", "Readings matter"]],
     "Emeric Tadesse": [3.4, 3.3, 63, 29, "Knowledgeable but monotone. Slides are posted early.", ["Slides posted"]],
     "Wendell Asante": [4.1, 2.4, 86, 40, "Long evening lecture with great stories and easy exams.", ["Easy exams", "Evening"]],
+    "Harriet Oduya": [4.6, 2.7, 93, 118, "So popular it fills every term. Case studies make every lecture interesting.", ["Engaging", "Fills fast"]],
+    "Lucien Ferreol": [3.8, 2.4, 74, 30, "Long evening lecture, but fair exams and clear slides.", ["Evening", "Fair exams"]],
 };
 
 export function sampleTerms()
