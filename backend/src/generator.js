@@ -351,14 +351,55 @@ export function alternativesFor({ unitKey, schedule, sections, allowedStatus, bu
 
 // ---------- Facts for the explanation prompt ----------
 
+const EARLY = 9 * 60; // a class starting before 9:00 counts as early
+const LATE = 18 * 60; // a class ending after 18:00 counts as late
+const hours = mins => Number((mins / 60).toFixed(1));
+
+function averageRating(sections, profs)
+{
+    const ratings = sections.filter(s => s.type === "LEC" && s.prof && profs[s.prof]?.rating != null).map(s => profs[s.prof].rating);
+    return ratings.length ? Number((ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(1)) : null;
+}
+
+// One row per day on campus: when it starts and ends, and how much of it is waiting.
+export function weekBreakdown(sections)
+{
+    return daysOnCampus(sections).map(day =>
+    {
+        const today = sections.filter(s => s.days.includes(day));
+        const first = Math.min(...today.map(s => toMinutes(s.start)));
+        const last = Math.max(...today.map(s => toMinutes(s.end)));
+        return {
+            day,
+            firstStart: fromMinutes(first),
+            lastEnd: fromMinutes(last),
+            hoursOnCampus: hours(last - first),
+            classes: today.length,
+            gapHours: hours(totalGapMinutes(today)),
+        };
+    });
+}
+
 export function scheduleFacts(schedule, best, preferences, profs)
 {
     const lectures = schedule.sections.filter(s => s.type === "LEC" && s.prof && profs[s.prof]?.rating != null);
-    const rated = lectures.map(s => ({ course: s.courseCode, prof: s.prof, rating: profs[s.prof].rating }));
-    const average = rated.length ? Number((rated.reduce((a, r) => a + r.rating, 0) / rated.length).toFixed(1)) : null;
+    const rated = lectures.map(s => ({
+        course: s.courseCode,
+        prof: s.prof,
+        rating: profs[s.prof].rating,
+        difficulty: profs[s.prof].difficulty ?? null,
+        wouldTakeAgainPercent: profs[s.prof].wouldTakeAgain ?? null,
+        numRatings: profs[s.prof].numRatings ?? null,
+    }));
+    const average = averageRating(schedule.sections, profs);
     const days = daysOnCampus(schedule.sections);
     const earliest = schedule.sections.reduce((m, s) => Math.min(m, toMinutes(s.start)), 24 * 60);
     const latest = schedule.sections.reduce((m, s) => Math.max(m, toMinutes(s.end)), 0);
+    const week = weekBreakdown(schedule.sections);
+    const longest = week.reduce((a, d) => (!a || d.hoursOnCampus > a.hoursOnCampus ? d : a), null);
+    const meetings = schedule.sections.flatMap(s => s.days.map(day => ({ s, day })));
+    const label = ({ s, day }) => `${s.courseCode} ${s.type} ${day} ${s.start}-${s.end}`;
+    const isBest = !best || schedule.id === best.id;
 
     return {
         professors: rated,
@@ -368,6 +409,16 @@ export function scheduleFacts(schedule, best, preferences, profs)
         weeklyGapHours: Number((totalGapMinutes(schedule.sections) / 60).toFixed(1)),
         earliestStart: fromMinutes(earliest),
         latestEnd: fromMinutes(latest),
+        week,
+        longestDay: longest,
+        earlyClasses: meetings.filter(m => toMinutes(m.s.start) < EARLY).map(label),
+        lateClasses: meetings.filter(m => toMinutes(m.s.end) > LATE).map(label),
+        classesBeforeRequestedStart: preferences.earliestStart
+            ? meetings.filter(m => toMinutes(m.s.start) < toMinutes(preferences.earliestStart)).map(label)
+            : [],
+        classesAfterRequestedEnd: preferences.latestEnd
+            ? meetings.filter(m => toMinutes(m.s.end) > toMinutes(preferences.latestEnd)).map(label)
+            : [],
         componentsIncluded: [...new Set(schedule.sections.map(s => s.type))],
         waitlistedSections: schedule.sections.filter(s => s.status === "WAITLIST").map(s => `${s.courseCode} ${s.sectionCode}`),
         requestedDaysOff: preferences.daysOff || [],
@@ -377,7 +428,13 @@ export function scheduleFacts(schedule, best, preferences, profs)
         weights: preferences.weights,
         score: schedule.score,
         pointsBehindBest: best ? best.score - schedule.score : 0,
-        isBest: !best || schedule.id === best.id,
+        isBest,
+        comparedWithBest: isBest ? null : {
+            score: best.score,
+            averageProfRating: averageRating(best.sections, profs),
+            daysOnCampus: daysOnCampus(best.sections).length,
+            weeklyGapHours: hours(totalGapMinutes(best.sections)),
+        },
         coursesThatDidNotFit: schedule.unplaced,
     };
 }
@@ -386,6 +443,59 @@ function fromMinutes(mins)
 {
     if (!Number.isFinite(mins)) return null;
     return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+}
+
+// Strengths and trade-offs without the AI. Same facts, fixed wording.
+export function describeDetails(facts)
+{
+    const strengths = [];
+    const tradeoffs = [];
+    const list = items => (items.length <= 2 ? items.join(" and ") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`);
+    const day = { MON: "Monday", TUE: "Tuesday", WED: "Wednesday", THU: "Thursday", FRI: "Friday", SAT: "Saturday", SUN: "Sunday" };
+    const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+    // "13:30" -> "1:30 PM", matching how the app shows times everywhere else.
+    const clock = t =>
+    {
+        const m = toMinutes(t);
+        const h = Math.floor(m / 60) % 12 || 12;
+        return `${h}${m % 60 ? `:${String(m % 60).padStart(2, "0")}` : ""} ${m >= 720 ? "PM" : "AM"}`;
+    };
+
+    const byRating = [...facts.professors].sort((a, b) => b.rating - a.rating);
+    if (facts.averageProfRating != null && facts.averageProfRating >= 4)
+    {
+        strengths.push(`Strong professors, averaging ${facts.averageProfRating} out of 5. ${byRating[0].prof} (${byRating[0].rating}) teaches ${byRating[0].course}.`);
+    }
+    const weak = byRating.filter(p => p.rating < 3);
+    if (weak.length) tradeoffs.push(`${list(weak.map(p => `${p.prof} (${p.rating}) for ${p.course}`))} ${weak.length === 1 ? "is" : "are"} rated below 3 out of 5.`);
+
+    const n = facts.daysOnCampus.length;
+    if (n <= 3) strengths.push(`Only ${plural(n, "day", "days")} on campus a week.`);
+    if (facts.weeklyGapHours < 1) strengths.push("Almost no waiting between classes.");
+    else if (facts.weeklyGapHours >= 4) tradeoffs.push(`About ${Math.round(facts.weeklyGapHours)} hours a week spent waiting between classes.`);
+
+    if (facts.longestDay && facts.longestDay.hoursOnCampus >= 8)
+    {
+        const d = facts.longestDay;
+        tradeoffs.push(`${day[d.day]} is long: ${clock(d.firstStart)} to ${clock(d.lastEnd)}, ${d.hoursOnCampus} hours on campus.`);
+    }
+
+    if (facts.requestedDaysOff.length)
+    {
+        const missed = facts.requestedDaysOff.filter(d => !facts.daysOffKept.includes(d));
+        if (!missed.length) strengths.push(`Keeps ${list(facts.requestedDaysOff.map(d => day[d]))} free, as you asked.`);
+        else tradeoffs.push(`Has classes on ${list(missed.map(d => day[d]))}, which you wanted off.`);
+    }
+    if (facts.classesBeforeRequestedStart.length) tradeoffs.push(`${plural(facts.classesBeforeRequestedStart.length, "class starts", "classes start")} before ${clock(facts.requestedEarliestStart)}.`);
+    else if (facts.requestedEarliestStart) strengths.push(`Nothing starts before ${clock(facts.requestedEarliestStart)}.`);
+    if (facts.classesAfterRequestedEnd.length) tradeoffs.push(`${plural(facts.classesAfterRequestedEnd.length, "class ends", "classes end")} after ${clock(facts.requestedLatestEnd)}.`);
+
+    if (facts.waitlistedSections.length) tradeoffs.push(`Waitlisted: ${list(facts.waitlistedSections)}. You may not get a seat.`);
+    else strengths.push("Every section has open seats.");
+
+    if (!facts.isBest && facts.pointsBehindBest > 0) tradeoffs.push(`Scores ${plural(facts.pointsBehindBest, "point", "points")} below your best match.`);
+
+    return { strengths: strengths.slice(0, 4), tradeoffs: tradeoffs.slice(0, 4) };
 }
 
 // Used when Gemini is unavailable, and as the no-AI fallback.

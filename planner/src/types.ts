@@ -113,9 +113,13 @@ export interface GenerateRequest {
   busy: BusyBlock[]
 }
 
+// Written by Gemini from facts the generator computed, or by fixed wording when the
+// AI is off. Either way it only restates those facts.
 export interface Explanation {
   scheduleId: string
-  text: string
+  text: string // two or three sentence summary
+  strengths: string[]
+  tradeoffs: string[]
 }
 
 // ---------- Added when the backend landed ----------

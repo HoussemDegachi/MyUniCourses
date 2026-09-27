@@ -1,14 +1,21 @@
-import { TriangleAlertIcon } from "lucide-react"
+import { useState } from "react"
+import { ListChecksIcon, TriangleAlertIcon } from "lucide-react"
+import { AnalysisDialog } from "@/components/schedule/AnalysisDialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import type { Schedule, Unplaced } from "@/types"
+import type { Comparison } from "@/lib/compare"
+import type { Explanation as Analysis, Preferences, Prof, Schedule, Unplaced } from "@/types"
 
 interface Props {
+  title: string // "Best match" or "Alternative"
   schedule: Schedule
-  text: string | undefined
+  analysis: Analysis | undefined
   loading: boolean
   courseCount: number
+  preferences: Preferences
+  profs: Record<string, Prof | null>
+  comparison: Comparison | null
   onAllowWaitlist?: () => void
 }
 
@@ -43,19 +50,37 @@ const PARTS = [
   { key: "gaps", label: "Gaps" },
 ] as const
 
-export function Explanation({ schedule, text, loading, courseCount, onAllowWaitlist }: Props) {
+export function Explanation({
+  title,
+  schedule,
+  analysis,
+  loading,
+  courseCount,
+  preferences,
+  profs,
+  comparison,
+  onAllowWaitlist,
+}: Props) {
+  const [open, setOpen] = useState(false)
   const placed = courseCount - schedule.unplaced.length
+  const text = analysis?.text
   return (
     <section className="grid gap-4 md:grid-cols-[1fr_14rem]" aria-live="polite">
       <div className="grid content-start gap-1.5">
-        <h2 className="text-sm font-semibold">
-          Why this schedule
-          {courseCount > 0 && (
-            <span className="ml-2 font-normal text-muted-foreground tabular">
-              {placed} of {courseCount} course{courseCount === 1 ? "" : "s"} placed
-            </span>
-          )}
-        </h2>
+        <div className="flex flex-wrap items-center gap-x-2">
+          <h2 className="text-sm font-semibold">
+            Why this schedule
+            {courseCount > 0 && (
+              <span className="ml-2 font-normal text-muted-foreground tabular">
+                {placed} of {courseCount} course{courseCount === 1 ? "" : "s"} placed
+              </span>
+            )}
+          </h2>
+          <Button variant="link" size="sm" className="h-auto p-0 text-primary" onClick={() => setOpen(true)}>
+            <ListChecksIcon />
+            Full analysis
+          </Button>
+        </div>
         {loading && !text ? (
           <div className="grid gap-2">
             <Skeleton className="h-4 w-full" />
@@ -102,6 +127,16 @@ export function Explanation({ schedule, text, loading, courseCount, onAllowWaitl
           )
         })}
       </dl>
+      <AnalysisDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={title}
+        schedule={schedule}
+        analysis={analysis}
+        preferences={preferences}
+        profs={profs}
+        comparison={comparison}
+      />
     </section>
   )
 }

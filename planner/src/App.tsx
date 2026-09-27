@@ -37,6 +37,7 @@ export default function App() {
     [best, p.active, p.profs],
   )
   const [showChanges, setShowChanges] = useState(false)
+  const allSections = useMemo(() => p.schedules.flatMap((s) => s.sections), [p.schedules])
 
   return (
     <MotionConfig reducedMotion="user">
@@ -138,6 +139,7 @@ export default function App() {
                 changed={comparison?.changedSectionIds}
                 focusChanged={showChanges && Boolean(comparison)}
                 buildId={p.buildId}
+                rangeSections={allSections}
               />
 
               {p.generating && (
@@ -156,7 +158,11 @@ export default function App() {
               <div className="shrink-0">
                 <Explanation
                   schedule={p.active}
-                  text={p.explanations[p.active.id]}
+                  title={p.active.id === best?.id ? "Best match" : "Alternative"}
+                  analysis={p.explanations[p.active.id]}
+                  preferences={p.preferences}
+                  profs={p.profs}
+                  comparison={comparison}
                   loading={p.explaining}
                   courseCount={p.courses.length}
                   onAllowWaitlist={() => {

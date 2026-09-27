@@ -47,7 +47,7 @@ export function compareSchedules(base: Schedule, other: Schedule, profs: Record<
   }
 
   metrics.push(
-    metric("Days on campus", daysOnCampus(base.sections).length, daysOnCampus(other.sections).length, "lower"),
+    metric("Days", daysOnCampus(base.sections).length, daysOnCampus(other.sections).length, "lower"),
     metric("Gaps", totalGapMinutes(base.sections) / 60, totalGapMinutes(other.sections) / 60, "lower", hours),
   )
 

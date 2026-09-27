@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { DAY_LABEL, DAY_SHORT, formatRange } from "@/lib/time"
+import { DAY_LABEL, DAY_SHORT, formatRange, toMinutes } from "@/lib/time"
 import { cn } from "@/lib/utils"
 import type { Day, Prof, Section } from "@/types"
 
@@ -20,6 +20,15 @@ interface Props {
   prof: Prof | null | undefined // undefined means still loading
   onLoadProf: (name: string) => void
   onSwap?: (unitKey: string) => void
+}
+
+function compactRange(start: string, end: string): string {
+  const clock = (t: string) => {
+    const m = toMinutes(t)
+    const h = Math.floor(m / 60) % 12 || 12
+    return `${h}:${String(m % 60).padStart(2, "0")}`
+  }
+  return `${clock(start)}–${clock(end)}`
 }
 
 const TYPE_LABEL: Record<string, string> = {
@@ -57,8 +66,12 @@ export function ClassBlock({
     return () => observer.disconnect()
   }, [])
 
-  const showTime = size.h >= 46
-  const showRoom = size.h >= 62 && size.w >= 90
+  // Heights are the content box (padding excluded). One line of code and type is
+  // about 15px and the time line about 13px, so the time fits from 27px up.
+  const showTime = size.h >= 27
+  const showRoom = size.h >= 40 && size.w >= 90
+  // Narrow blocks drop AM/PM: "8:30-9:50" instead of "8:30 AM to 9:50 AM".
+  const time = size.w >= 118 ? formatRange(section.start, section.end) : compactRange(section.start, section.end)
 
   return (
     <HoverCard
@@ -100,7 +113,7 @@ export function ClassBlock({
           </span>
           {showTime && (
             <span className="relative block text-[10px] leading-tight opacity-80 tabular">
-              {formatRange(section.start, section.end)}
+              {time}
             </span>
           )}
           {showRoom && section.location && (

@@ -19,6 +19,9 @@ interface Props {
   changed?: Set<string> // section ids that differ from the best match
   focusChanged?: boolean // fade everything that didn't change
   buildId: number // goes up on every rebuild, so a new week is drawn fresh
+  // Every schedule being compared. The hour range covers all of them, so switching
+  // tabs never rescales the grid and the same class stays the same size.
+  rangeSections?: Section[]
 }
 
 // Where a block lives, independent of which section fills it. A block whose slot
@@ -43,6 +46,7 @@ export function WeekGrid({
   changed,
   focusChanged,
   buildId,
+  rangeSections,
 }: Props) {
   // Always the full week: uOttawa does schedule Saturday and Sunday sections.
   const days = ALL_DAYS
@@ -84,7 +88,7 @@ export function WeekGrid({
 
   const { firstHour, lastHour } = useMemo(() => {
     const times = [
-      ...sections.flatMap((s) => [toMinutes(s.start), toMinutes(s.end)]),
+      ...(rangeSections ?? sections).flatMap((s) => [toMinutes(s.start), toMinutes(s.end)]),
       ...busy.flatMap((b) => [toMinutes(b.start), toMinutes(b.end)]),
     ]
 
@@ -95,7 +99,7 @@ export function WeekGrid({
       firstHour: Math.max(GRID_MIN_HOUR, Math.min(start, 9)),
       lastHour: Math.min(GRID_MAX_HOUR, Math.max(end, 17)),
     }
-  }, [sections, busy])
+  }, [sections, rangeSections, busy])
 
   const dayStart = firstHour * 60
   const dayLength = (lastHour - firstHour) * 60

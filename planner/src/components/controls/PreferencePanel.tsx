@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { DAY_SHORT, WEEKDAYS, formatTime } from "@/lib/time"
+import { ALL_DAYS, DAY_SHORT, formatTime } from "@/lib/time"
 import type { ChosenStatus, Day, Preferences, Weights } from "@/types"
 
 interface Props {
@@ -80,8 +80,8 @@ export function PreferencePanel({ value, onChange, animateKey }: Props) {
           value={value.daysOff}
           onValueChange={(days) => onChange({ ...value, daysOff: days as Day[] })}
         >
-          {WEEKDAYS.map((d) => (
-            <ToggleGroupItem key={d} value={d} className="flex-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+          {ALL_DAYS.map((d) => (
+            <ToggleGroupItem key={d} value={d} className="min-w-0 flex-1 px-0 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
               {DAY_SHORT[d]}
             </ToggleGroupItem>
           ))}

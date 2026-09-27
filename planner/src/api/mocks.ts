@@ -1,6 +1,7 @@
 // Fake versions of every backend endpoint. Same inputs and outputs as the real API.
 import type { Alternative, AlternativesRequest, Course, Day, Explanation, GenerateRequest, Preferences, Prof, Schedule, Section, Term } from "@/types"
 import { COURSES, PROFS, SECTIONS, SEQUENCES, TERMS } from "@/api/mockData"
+import { describeDetails } from "@/lib/analysis"
 import { alternativesFor, daysOnCampus, generateSchedules, totalGapMinutes } from "@/lib/generator"
 import { DAY_LABEL, fromMinutes, formatTime, toMinutes } from "@/lib/time"
 
@@ -51,6 +52,8 @@ export async function parsePreferences(prompt: string, current: Preferences): Pr
     [/wednesday|wednesdays/, "WED"],
     [/thursday|thursdays/, "THU"],
     [/friday|fridays/, "FRI"],
+    [/saturday|saturdays|weekend/, "SAT"],
+    [/sunday|sundays|weekend/, "SUN"],
   ]
   for (const [re, day] of days) {
     const m = text.match(re)
@@ -107,7 +110,7 @@ export async function alternatives(req: AlternativesRequest): Promise<Alternativ
 export async function explain(schedules: Schedule[], prefs: Preferences): Promise<Explanation[]> {
   await wait(700)
   const best = schedules[0]
-  return schedules.map((s) => ({ scheduleId: s.id, text: describe(s, best, prefs) }))
+  return schedules.map((s) => ({ scheduleId: s.id, text: describe(s, best, prefs), ...describeDetails(s, best, prefs, PROFS) }))
 }
 
 function describe(s: Schedule, best: Schedule, prefs: Preferences): string {

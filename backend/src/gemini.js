@@ -4,6 +4,9 @@
 // It never invents ratings, times or scores. Anything factual is computed in
 // generator.js and passed in, so the model can only phrase what is already true.
 
+import { createHash } from "node:crypto";
+import { cached } from "./lib/cache.js";
+
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
 
@@ -140,35 +143,64 @@ export async function summarizeProf(name, reviews)
 
 // ---------- Schedule explanations ----------
 
-const EXPLAIN_SYSTEM = `You explain to a student why a class schedule suits them, and what it costs them.
+const EXPLAIN_SYSTEM = `You analyse a class schedule for a student: what it gives them, and what it costs them.
 
 You are given facts already computed from the schedule. Use only those facts.
 - Never state a number, time, professor rating or day that is not in the facts.
-- Two or three sentences. Speak to the student as "you".
-- Lead with what the schedule gives them, then name the real trade-off.
-- If the schedule scores below the top option, say plainly what it gives up.
-- If courses could not be placed, say which and why, using only the reason and conflictsWith given for each.
-  NOT_OFFERED: not offered this term. FULL: every section is full. WAITLIST_ONLY: only waitlisted sections are left.
-  BUSY: every section overlaps the busy times named. CLASH: it overlaps the courses named in this schedule.
-- No greetings, no headings, no bullet points.`;
+- Speak to the student as "you". Plain language, no greetings, no headings.
+- summary: two or three sentences. Lead with what the schedule gives them, then the biggest trade-off.
+  If it is not the best option, say plainly what it gives up compared with comparedWithBest.
+- strengths: two to four short sentences, each one specific thing that is good about this week.
+  Use the week breakdown, professors, preferences kept and open seats.
+- tradeoffs: two to four short sentences, each one specific cost: long days (longestDay), waiting between
+  classes, early or late classes, low-rated or hard professors, waitlisted sections, missed preferences.
+  If there is genuinely nothing to give up, return an empty list rather than inventing one.
+- If courses could not be placed, include that in tradeoffs, naming which and why, using only the reason and
+  conflictsWith given for each. NOT_OFFERED: not offered this term. FULL: every section is full.
+  WAITLIST_ONLY: only waitlisted sections are left. BUSY: every section overlaps the busy times named.
+  CLASH: it overlaps the courses named in this schedule.`;
 
+const EXPLAIN_SCHEMA = {
+    type: "object",
+    properties: {
+        summary: { type: "string" },
+        strengths: { type: "array", items: { type: "string" } },
+        tradeoffs: { type: "array", items: { type: "string" } },
+    },
+    required: ["summary", "strengths", "tradeoffs"],
+};
+
+const EXPLAIN_TTL = 7 * 24 * 60 * 60 * 1000;
+
+const cleanList = v => (Array.isArray(v) ? v.filter(x => typeof x === "string" && x.trim()).map(x => x.trim()).slice(0, 4) : null);
+
+// item.fallback is { text, strengths, tradeoffs } built without the AI. Any part the
+// model leaves out or garbles falls back to it, so the panel is never half empty.
 export async function explainSchedules(items)
 {
-    const results = await Promise.all(items.map(async item =>
+    return Promise.all(items.map(async item =>
     {
         try
         {
-            const text = await callGemini({
+            // Same facts, same write-up. Rebuilding or switching back to a schedule costs no
+            // quota, which matters on the free tier. A failed call throws and is never cached.
+            const key = `explain-${createHash("sha1").update(JSON.stringify(item.facts)).digest("hex")}`;
+            const out = await cached(key, EXPLAIN_TTL, () => callGemini({
                 system: EXPLAIN_SYSTEM,
                 user: JSON.stringify(item.facts),
+                schema: EXPLAIN_SCHEMA,
                 temperature: 0.4,
-            });
-            return { scheduleId: item.scheduleId, text };
+            }));
+            return {
+                scheduleId: item.scheduleId,
+                text: typeof out.summary === "string" && out.summary.trim() ? out.summary.trim() : item.fallback.text,
+                strengths: cleanList(out.strengths) ?? item.fallback.strengths,
+                tradeoffs: cleanList(out.tradeoffs) ?? item.fallback.tradeoffs,
+            };
         }
         catch
         {
-            return { scheduleId: item.scheduleId, text: item.fallback };
+            return { scheduleId: item.scheduleId, ...item.fallback };
         }
     }));
-    return results;
 }

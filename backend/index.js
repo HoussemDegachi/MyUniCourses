@@ -8,6 +8,7 @@ import { scraperIsUp, searchCourses, sectionsFor, terms, useSample } from "./src
 import { explainSchedules, geminiEnabled, parsePreferences, summarizeProf } from "./src/gemini.js";
 import {
     alternativesFor,
+    describeDetails,
     describeSchedule,
     generateSchedules,
     scheduleFacts,
@@ -224,10 +225,10 @@ app.post("/api/schedules/explain", route(async (req, res) =>
     const items = schedules.map(schedule =>
     {
         const facts = scheduleFacts(schedule, best, prefs, profs);
-        return { scheduleId: schedule.id, facts, fallback: describeSchedule(facts) };
+        return { scheduleId: schedule.id, facts, fallback: { text: describeSchedule(facts), ...describeDetails(facts) } };
     });
 
-    if (!geminiEnabled()) return res.json(items.map(i => ({ scheduleId: i.scheduleId, text: i.fallback })));
+    if (!geminiEnabled()) return res.json(items.map(i => ({ scheduleId: i.scheduleId, ...i.fallback })));
     res.json(await explainSchedules(items));
 }));
 

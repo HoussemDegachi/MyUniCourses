@@ -38,7 +38,7 @@ export function usePlanner() {
   const [busy, setBusy] = useState<BusyBlock[]>([])
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [activeId, setActiveId] = useState("")
-  const [explanations, setExplanations] = useState<Record<string, string>>({})
+  const [explanations, setExplanations] = useState<Record<string, Explanation>>({})
   const [generating, setGenerating] = useState(false)
   const [explaining, setExplaining] = useState(false)
   const [profs, setProfs] = useState<Record<string, Prof | null>>({})
@@ -172,7 +172,7 @@ export function usePlanner() {
       // Merge, don't replace: after swapping one component we only re-explain
       // the schedule that changed, and the other tabs keep their write-ups.
       .then((items: Explanation[]) =>
-        setExplanations((prev) => ({ ...prev, ...Object.fromEntries(items.map((e) => [e.scheduleId, e.text])) })),
+        setExplanations((prev) => ({ ...prev, ...Object.fromEntries(items.map((e) => [e.scheduleId, e])) })),
       )
       .catch(() => {
         // The schedules are still usable without the write-up, so stay quiet.
