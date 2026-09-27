@@ -1,0 +1,280 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Design idea: a printed timetable you mark up with highlighters.
+  Cool paper and ink for the chrome, one garnet accent for actions,
+  and highlighter colours reserved for the courses themselves.
+*/
+
+:root {
+  --radius: 0.5rem;
+
+  --paper: #f6f7f9;
+  --ink: #1c2331;
+  --rule: #dde2e9;
+  --garnet: #8c1d2f;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--garnet);
+  --primary-foreground: #ffffff;
+  --secondary: #e9ecf1;
+  --secondary-foreground: var(--ink);
+  --muted: #eceff3;
+  --muted-foreground: #5b6474;
+  --accent: #e9ecf1;
+  --accent-foreground: var(--ink);
+  --destructive: #c62828;
+  --border: var(--rule);
+  --input: #cfd5de;
+  --ring: #8c1d2f66;
+
+  /* Highlighters. Each course gets one. */
+  --hl-1: #ffe45c;
+  --hl-2: #8ae6bd;
+  --hl-3: #8fd0ff;
+  --hl-4: #ffa8cf;
+  --hl-5: #cdb6ff;
+  --hl-6: #ffc58a;
+  --hl-7: #b9ec74;
+  --hl-8: #7fe3e0;
+
+  --better: #1d7a4c;
+  --worse: #c62828;
+
+  /* Highlighter ink on the class blocks. */
+  --ink-strength: 62%;
+  --ink-edge: #000;
+  --ink-text: #151b27;
+  --texture: 38%;
+
+  --busy: #c5ccd6;
+  --grid-line: #e4e8ee;
+  --grid-line-strong: #cfd6df;
+}
+
+.dark {
+  --paper: #121722;
+  --ink: #e7ebf2;
+  --rule: #2a3242;
+  --garnet: #e0566b;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #182030;
+  --card-foreground: var(--ink);
+  --popover: #1b2333;
+  --popover-foreground: var(--ink);
+  --primary: var(--garnet);
+  --primary-foreground: #14080b;
+  --secondary: #222b3b;
+  --secondary-foreground: var(--ink);
+  --muted: #1f2737;
+  --muted-foreground: #9aa4b5;
+  --accent: #253044;
+  --accent-foreground: var(--ink);
+  --destructive: #ff6b6b;
+  --border: var(--rule);
+  --input: #334056;
+  --ring: #e0566b66;
+
+  --hl-1: #d9bf2e;
+  --hl-2: #3fbf8c;
+  --hl-3: #4aa8e8;
+  --hl-4: #e0679e;
+  --hl-5: #9a7ff0;
+  --hl-6: #e59a4f;
+  --hl-7: #8cc443;
+  --hl-8: #3fbdba;
+
+  --better: #5fd39b;
+  --worse: #ff6b6b;
+
+  /* On dark paper the ink is thinner and the text light, or it turns to mud. */
+  --ink-strength: 30%;
+  --ink-edge: #fff;
+  --ink-text: #eef1f6;
+  --texture: 30%;
+
+  --busy: #3a4458;
+  --grid-line: #1e2635;
+  --grid-line-strong: #2c3547;
+}
+
+@theme inline {
+  --font-sans: "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-busy: var(--busy);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    min-height: 100%;
+    font-feature-settings: "ss01";
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/*
+  Class blocks: highlighter ink on paper. A see-through wash of the course colour,
+  a stronger stripe where the marker first touched down, and ink pooling slightly
+  where the stroke ends. Texture says what kind of class it is, so the type reads
+  without relying on colour: lectures plain, labs hatched, DGDs and tutorials dotted.
+*/
+/* In a layer so utilities such as the focus ring still win over these. */
+@layer components {
+  /* The stroke being drawn, left to right. The final inset is negative so nothing
+     outside the block (focus rings) gets clipped once the stroke is finished. */
+  .ink-draw {
+    animation: ink-draw 520ms cubic-bezier(0.32, 0.72, 0.24, 1) both;
+    animation-delay: var(--draw-delay, 0ms);
+  }
+
+  .ink {
+    --wash: color-mix(in oklab, var(--hl) var(--ink-strength), var(--card));
+    --pool: color-mix(in oklab, var(--hl) calc(var(--ink-strength) + 18%), var(--card));
+    --nib: color-mix(in oklab, var(--hl), var(--ink-edge) 22%);
+    position: relative;
+    border-radius: 3px 5px 5px 3px;
+    color: var(--ink-text);
+    background: linear-gradient(90deg, var(--wash) 0 82%, var(--pool) 100%);
+    box-shadow: inset 3px 0 0 var(--nib);
+  }
+
+  /* The texture fades out behind the text at the top, so the label stays clean. */
+  .ink::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.2) 0 26px, #000 44px);
+  }
+  .ink[data-type="LAB"]::before {
+    background-image: repeating-linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--nib) var(--texture), transparent) 0 1.5px,
+      transparent 1.5px 7px
+    );
+  }
+  .ink[data-type="DGD"]::before,
+  .ink[data-type="TUT"]::before {
+    background-image: radial-gradient(color-mix(in oklab, var(--nib) var(--texture), transparent) 1px, transparent 1.6px);
+    background-size: 7px 7px;
+  }
+
+  /* Waitlisted: drawn in pencil first, so a dashed outline inside the stroke. */
+  .ink[data-waitlist] {
+    outline: 1.5px dashed color-mix(in oklab, var(--ink-text) 45%, transparent);
+    outline-offset: -3px;
+  }
+
+  /* Conflicts keep a steady red edge and pulse twice when they first appear. */
+  .ink[data-conflict] {
+    box-shadow:
+      inset 3px 0 0 var(--nib),
+      inset 0 0 0 2px var(--destructive);
+  }
+  .ink[data-conflict]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    animation: conflict-pulse 0.9s ease-out 2;
+  }
+}
+
+@keyframes conflict-pulse {
+  from {
+    box-shadow: inset 0 0 0 2px var(--destructive);
+    background: color-mix(in oklab, var(--destructive) 25%, transparent);
+  }
+  to {
+    box-shadow: inset 0 0 0 6px transparent;
+    background: transparent;
+  }
+}
+
+@keyframes ink-draw {
+  from {
+    clip-path: inset(-6px 100% -6px -6px);
+  }
+  to {
+    clip-path: inset(-6px -6px -6px -6px);
+  }
+}
+
+.busy-hatch {
+  background-image: repeating-linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--busy) 55%, transparent) 0 6px,
+    transparent 6px 12px
+  );
+  background-color: color-mix(in oklab, var(--busy) 25%, transparent);
+}
+
+/* Controls column scrollbar. Invisible at rest, ink-grey when you hover the
+   panel, garnet while you are actually scrolling. */
+.themed-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  scrollbar-gutter: stable;
+  transition: scrollbar-color 0.35s ease;
+}
+.themed-scroll:hover {
+  scrollbar-color: var(--input) transparent;
+}
+.themed-scroll[data-scrolling] {
+  scrollbar-color: var(--primary) transparent;
+  transition-duration: 0.12s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
