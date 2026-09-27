@@ -86,6 +86,10 @@ export const api = {
   getProf: (name: string): Promise<Prof | null> =>
     USE_MOCKS ? mocks.getProf(name) : http(`/api/profs/${encodeURIComponent(name)}/summary`),
 
+  // Fills in the sliders from the sentence. Build still sends the sentence to the AI route too.
+  parsePreferences: (prompt: string, current: Preferences): Promise<Preferences> =>
+    USE_MOCKS ? mocks.parsePreferences(prompt, current) : post("/api/preferences/parse", { prompt, current }),
+
   generate: (req: GenerateRequest): Promise<Schedule[]> =>
     USE_MOCKS ? mocks.generate(req) : post("/api/schedules/generate", req),
 

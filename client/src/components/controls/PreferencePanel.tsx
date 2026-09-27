@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react"
+import { animate } from "motion/react"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
@@ -8,6 +10,7 @@ import type { ChosenStatus, Day, Preferences, Weights } from "@/types"
 interface Props {
   value: Preferences
   onChange: (p: Preferences) => void
+  animateKey: number // changes after the AI fills in preferences
 }
 
 const WEIGHT_LABELS: { key: keyof Weights; label: string; hint: string }[] = [
@@ -20,7 +23,9 @@ const START_OPTIONS = ["08:00", "08:30", "09:00", "10:00", "11:00", "12:00"]
 const END_OPTIONS = ["14:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"]
 const ANY = "any"
 
-export function PreferencePanel({ value, onChange }: Props) {
+export function PreferencePanel({ value, onChange, animateKey }: Props) {
+  const shown = useAnimatedWeights(value.weights, animateKey)
+
   const setWeight = (key: keyof Weights, n: number) =>
     onChange({ ...value, weights: { ...value.weights, [key]: n } })
 
@@ -31,14 +36,14 @@ export function PreferencePanel({ value, onChange }: Props) {
           <div key={key} className="grid grid-cols-1 gap-2">
             <div className="flex items-baseline justify-between">
               <Label htmlFor={`w-${key}`}>{label}</Label>
-              <span className="text-xs text-muted-foreground tabular">{Math.round(value.weights[key])}</span>
+              <span className="text-xs text-muted-foreground tabular">{Math.round(shown[key])}</span>
             </div>
             <Slider
               id={`w-${key}`}
               min={0}
               max={100}
               step={5}
-              value={[value.weights[key]]}
+              value={[shown[key]]}
               onValueChange={([n]) => setWeight(key, n)}
               aria-describedby={`w-${key}-hint`}
             />
@@ -139,4 +144,35 @@ function TimeSelect({
       </Select>
     </div>
   )
+}
+
+// When the AI fills in weights, glide the sliders to their new values so people see what changed.
+// When the user drags a slider, follow it instantly.
+function useAnimatedWeights(target: Weights, animateKey: number): Weights {
+  const [shown, setShown] = useState(target)
+  const lastKey = useRef(animateKey)
+  const shownRef = useRef(shown)
+  shownRef.current = shown
+
+  useEffect(() => {
+    if (animateKey === lastKey.current) {
+      setShown(target)
+      return
+    }
+    lastKey.current = animateKey
+    const from = shownRef.current
+    const controls = animate(0, 1, {
+      duration: 0.9,
+      ease: [0.22, 1, 0.36, 1],
+      onUpdate: (t) =>
+        setShown({
+          prof: from.prof + (target.prof - from.prof) * t,
+          time: from.time + (target.time - from.time) * t,
+          gaps: from.gaps + (target.gaps - from.gaps) * t,
+        }),
+    })
+    return () => controls.stop()
+  }, [target, animateKey])
+
+  return shown
 }

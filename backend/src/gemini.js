@@ -97,6 +97,101 @@ function errorMessage(raw)
     }
 }
 
+// ---------- Preferences ----------
+//
+// Turns the student's sentence into the settings the sliders show, so they can see what
+// was understood and correct it. The Build button still sends the sentence to the AI
+// schedule route as well; this only fills in the controls.
+
+const DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+const PREFERENCE_SCHEMA = {
+    type: "object",
+    properties: {
+        earliestStart: { type: "string", nullable: true, description: "24h HH:MM, or null for no preference" },
+        latestEnd: { type: "string", nullable: true, description: "24h HH:MM, or null for no preference" },
+        daysOff: { type: "array", items: { type: "string", enum: DAYS } },
+        freeTimes: {
+            type: "array",
+            items: {
+                type: "object",
+                properties: {
+                    day: { type: "string", enum: DAYS },
+                    start: { type: "string", description: "24h HH:MM" },
+                    end: { type: "string", description: "24h HH:MM" },
+                },
+                required: ["day", "start", "end"],
+            },
+        },
+        allowWaitlist: { type: "boolean" },
+        weights: {
+            type: "object",
+            properties: {
+                prof: { type: "number" },
+                time: { type: "number" },
+                gaps: { type: "number" },
+            },
+            required: ["prof", "time", "gaps"],
+        },
+        notes: { type: "array", items: { type: "string" } },
+    },
+    required: ["daysOff", "freeTimes", "allowWaitlist", "weights", "notes"],
+};
+
+const PREFERENCE_SYSTEM = `You turn a student's description of their ideal class schedule into settings.
+
+Rules:
+- Only change what the student actually mentions. Keep every other value exactly as given in "current".
+- weights are 0 to 100. 0 means the student does not care, 100 means it is their top priority.
+  prof = wanting higher-rated professors.
+  time = wanting classes inside their preferred hours and days.
+  gaps = wanting classes close together with little idle time.
+- If they say one thing matters more than another, raise that weight to about 85 and lower the other to about 30.
+- earliestStart is the earliest a class may begin. latestEnd is the latest a class may end.
+- "no classes before 10" means earliestStart "10:00". "done by 4" means latestEnd "16:00".
+- daysOff are whole days they want completely free. "Weekends off" means SAT and SUN.
+- freeTimes are parts of a day they want kept free, e.g. "Friday afternoons free" is
+  { day: "FRI", start: "12:00", end: "18:00" } and "Tuesdays 2 to 4 for work" is { day: "TUE", start: "14:00", end: "16:00" }.
+  Use daysOff instead when they want the whole day.
+- allowWaitlist is false only if they say they want to avoid waitlists.
+- notes: at most two short sentences about anything you could not put into a field, written to the student
+  as plain advice. Use an empty array when there is nothing. Never restate the fields.
+- Never invent a preference they did not express.`;
+
+const clock = v => (typeof v === "string" && /^\d{1,2}:\d{2}$/.test(v) ? v.padStart(5, "0") : null);
+
+export async function parsePreferences(prompt, current)
+{
+    const parsed = await callGemini({
+        system: PREFERENCE_SYSTEM,
+        user: `current: ${JSON.stringify(current)}\n\nstudent says: ${prompt}`,
+        schema: PREFERENCE_SCHEMA,
+    });
+
+    // The schema shapes the answer, but check it anyway: this drives the UI directly.
+    const clamp = (n, fallback) => (typeof n === "number" && Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : fallback);
+    const days = Array.isArray(parsed.daysOff) ? parsed.daysOff.filter(d => DAYS.includes(d)) : current.daysOff;
+    const freeTimes = Array.isArray(parsed.freeTimes)
+        ? parsed.freeTimes
+            .map(f => ({ day: f?.day, start: clock(f?.start), end: clock(f?.end) }))
+            .filter(f => DAYS.includes(f.day) && f.start && f.end && f.start < f.end)
+        : current.freeTimes || [];
+
+    return {
+        earliestStart: parsed.earliestStart === undefined ? current.earliestStart : clock(parsed.earliestStart),
+        latestEnd: parsed.latestEnd === undefined ? current.latestEnd : clock(parsed.latestEnd),
+        daysOff: [...new Set(days)],
+        freeTimes,
+        allowedStatus: parsed.allowWaitlist === false ? ["OPEN"] : ["OPEN", "WAITLIST"],
+        weights: {
+            prof: clamp(parsed.weights?.prof, current.weights.prof),
+            time: clamp(parsed.weights?.time, current.weights.time),
+            gaps: clamp(parsed.weights?.gaps, current.weights.gaps),
+        },
+        notes: Array.isArray(parsed.notes) ? parsed.notes.filter(n => typeof n === "string").slice(0, 2) : [],
+    };
+}
+
 // ---------- Professor summaries ----------
 
 const PROF_SYSTEM = `You summarize student reviews of a university professor for another student choosing a section.

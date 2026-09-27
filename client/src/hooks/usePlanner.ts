@@ -61,7 +61,8 @@ function loadSaved(): Saved {
   try {
     const saved: Saved = { ...NOTHING_SAVED, ...JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}") }
     if (!saved.schedules.some((s) => s.id === saved.activeId)) saved.activeId = saved.schedules[0]?.id ?? ""
-    // Free times and notes only ever came from the old Read my preferences button.
+    // Free times and notes come from Read my preferences and are only shown right after it.
+    // After a refresh nothing would show them, so start without rather than filter invisibly.
     saved.preferences = { ...saved.preferences, freeTimes: [], notes: [] }
     return saved
   } catch {
@@ -89,6 +90,8 @@ export function usePlanner() {
   const [schedules, setSchedules] = useState<Schedule[]>(saved.schedules)
   const [activeId, setActiveId] = useState(saved.activeId)
   const [explanations, setExplanations] = useState<Record<string, Explanation>>(saved.explanations)
+  const [parsing, setParsing] = useState(false)
+  const [parseCount, setParseCount] = useState(0) // bumps after each AI read, animates the sliders
   const [generating, setGenerating] = useState(false)
   const [explaining, setExplaining] = useState(false)
   const [profs, setProfs] = useState<Record<string, Prof | null>>({})
@@ -200,6 +203,20 @@ export function usePlanner() {
     },
     [termId, courses],
   )
+
+  // Reads the sentence into the sliders so the student can see what was understood.
+  const readPrompt = useCallback(async () => {
+    if (!prompt.trim()) return
+    setParsing(true)
+    try {
+      setPreferences(await api.parsePreferences(prompt, preferences))
+      setParseCount((n) => n + 1)
+    } catch (err) {
+      toast.error(message(err, "Couldn't read your preferences. Set them with the sliders instead."))
+    } finally {
+      setParsing(false)
+    }
+  }, [prompt, preferences])
 
   // request is the student's own words, so the write-up can say whether they got what they asked for.
   const explain = useCallback((list: Schedule[], prefs: Preferences, request: string) => {
@@ -376,6 +393,9 @@ export function usePlanner() {
     setPreferences,
     prompt,
     setPrompt,
+    parsing,
+    parseCount,
+    readPrompt,
     busy,
     importCalendar,
     schedules,

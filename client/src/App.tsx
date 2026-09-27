@@ -68,9 +68,13 @@ export default function App() {
                 value={p.prompt}
                 onChange={p.setPrompt}
                 onSubmit={p.generate}
+                onRead={p.readPrompt}
+                parsing={p.parsing}
+                parseCount={p.parseCount}
+                preferences={p.preferences}
                 available={p.health?.gemini ?? true}
               />
-              <PreferencePanel value={p.preferences} onChange={p.setPreferences} />
+              <PreferencePanel value={p.preferences} onChange={p.setPreferences} animateKey={p.parseCount} />
             </ScrollPanel>
 
             <div className="shrink-0 border-t p-3">

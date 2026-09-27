@@ -1,5 +1,5 @@
 // Fake versions of every backend endpoint. Same inputs and outputs as the real API.
-import type { Alternative, AlternativesRequest, Course, Explanation, GenerateRequest, Preferences, Prof, Schedule, Term } from "@/types"
+import type { Alternative, AlternativesRequest, Course, Day, Explanation, GenerateRequest, Preferences, Prof, Schedule, Term } from "@/types"
 import { COURSES, PROFS, SECTIONS, SEQUENCES, TERMS } from "@/api/mockData"
 import { describeDetails } from "@/lib/analysis"
 import { alternativesFor, daysOnCampus, generateSchedules, inFreeTime, totalGapMinutes } from "@/lib/generator"
@@ -30,6 +30,60 @@ export async function getProf(name: string): Promise<Prof | null> {
 }
 
 // Stand-in for Gemini. Picks up the common phrasings so the demo flow works.
+// Stand-in for Gemini. Picks up the common phrasings so the demo flow works.
+export async function parsePreferences(prompt: string, current: Preferences): Promise<Preferences> {
+  await wait(900)
+  const text = prompt.toLowerCase()
+  const next: Preferences = {
+    ...current,
+    daysOff: [...current.daysOff],
+    freeTimes: [...(current.freeTimes ?? [])],
+    weights: { ...current.weights },
+    notes: [],
+  }
+
+  const before = text.match(/(?:before|earlier than)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/)
+  if (before) next.earliestStart = clock(before[1], before[2], before[3], "am")
+
+  const after = text.match(/(?:after|later than|past)\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/)
+  if (after) next.latestEnd = clock(after[1], after[2], after[3], "pm")
+
+  const days: [RegExp, Day][] = [
+    [/monday|mondays/, "MON"],
+    [/tuesday|tuesdays/, "TUE"],
+    [/wednesday|wednesdays/, "WED"],
+    [/thursday|thursdays/, "THU"],
+    [/friday|fridays/, "FRI"],
+    [/saturday|saturdays|weekend/, "SAT"],
+    [/sunday|sundays|weekend/, "SUN"],
+  ]
+  for (const [re, day] of days) {
+    const m = text.match(re)
+    if (!m) continue
+    const around = text.slice(Math.max(0, m.index! - 25), m.index! + 25)
+    if (/\b(no|off|free|avoid|without)\b/.test(around) && !next.daysOff.includes(day)) next.daysOff.push(day)
+  }
+
+  if (/\b(prof|profs|professor|teacher|rating|ratings)\b/.test(text)) next.weights.prof = 85
+  if (/\b(gap|gaps|back to back|back-to-back|compact)\b/.test(text)) next.weights.gaps = 80
+  if (/\b(sleep|morning|early|late|evening|night)\b/.test(text)) next.weights.time = Math.max(next.weights.time, 75)
+  if (/\b(don'?t care|doesn'?t matter)\b.*\bprof/.test(text)) next.weights.prof = 20
+
+  next.allowedStatus = /\bwaitlist/.test(text) && /\b(no|avoid|don'?t)\b/.test(text) ? ["OPEN"] : next.allowedStatus
+
+  if (/\bwork|job|shift/.test(text)) next.notes.push("You mentioned work. Import your shifts as a calendar so classes avoid them.")
+
+  return next
+}
+
+function clock(h: string, m: string | undefined, ampm: string | undefined, fallback: "am" | "pm"): string {
+  let hour = Number(h)
+  const suffix = ampm ?? (hour >= 1 && hour <= 7 ? "pm" : fallback)
+  if (suffix === "pm" && hour < 12) hour += 12
+  if (suffix === "am" && hour === 12) hour = 0
+  return fromMinutes(hour * 60 + Number(m ?? 0))
+}
+
 export async function generate(req: GenerateRequest): Promise<Schedule[]> {
   await wait(600)
   return generateSchedules({

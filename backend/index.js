@@ -5,7 +5,7 @@ import express from "express";
 import { readUser, requireUser, authEnabled } from "./src/auth.js";
 import { calendarEnabled, pushSchedule } from "./src/calendar.js";
 import { scraperIsUp, searchCourses, sectionsFor, terms, useSample } from "./src/catalog.js";
-import { explainSchedules, geminiEnabled } from "./src/gemini.js";
+import { explainSchedules, geminiEnabled, parsePreferences } from "./src/gemini.js";
 import {
     alternativesFor,
     describeDetails,
@@ -130,6 +130,34 @@ app.get("/api/profs/:name/summary", route(async (req, res) =>
 {
     const name = decodeURIComponent(req.params.name);
     res.json(await profSummary(name));
+}));
+
+// ---------- Preferences ----------
+
+// Fills in the sliders from the student's sentence. Separate from /api/schedules/ai, which
+// still gets the sentence itself when they press Build.
+app.post("/api/preferences/parse", route(async (req, res) =>
+{
+    const { prompt, current } = req.body || {};
+    if (!prompt?.trim()) return res.status(400).json({ error: "prompt is required" });
+    if (!geminiEnabled()) return res.status(501).json({ error: "The AI isn't configured on this server. Use the sliders instead." });
+
+    const base = { ...DEFAULT_PREFERENCES, ...(current || {}) };
+    try
+    {
+        res.json(await parsePreferences(prompt.slice(0, 2000), base));
+    }
+    catch (err)
+    {
+        // Google's own error text is long and technical. Say what happened and what to do.
+        console.error("preferences parse failed", err.message);
+        const busy = /Gemini 429/.test(err.message);
+        res.status(busy ? 429 : 502).json({
+            error: busy
+                ? "The AI is at its limit for the moment. Try again in a minute, or set the sliders yourself."
+                : "Couldn't read your preferences just now. Set them with the sliders instead.",
+        });
+    }
 }));
 
 // ---------- Schedules ----------
