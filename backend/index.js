@@ -20,8 +20,8 @@ import aiScheduleRouter from "./routes/schedule.js";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-const APP_NAME = process.env.APP_NAME || "uschedule.ai";
-// Most courses a student can plan at once. Matches MAX_COURSES in planner/src/config.ts.
+const APP_NAME = process.env.APP_NAME || "myUni.Courses";
+// Most courses a student can plan at once. Matches MAX_COURSES in client/src/config.ts.
 const MAX_COURSES = 6;
 
 // Any site may call the API unless CORS_ORIGIN lists specific ones. That's safe here: no
@@ -82,7 +82,7 @@ app.get("/api/sections", route(async (req, res) =>
 // the catalogue pages, and scraping them properly is its own project. These are the
 // usual first-year required courses, not the full official sequence (electives are
 // left to the student), so check them against the catalogue before relying on them.
-// Keep the ids in step with PROGRAMS in planner/src/config.ts, which also has their names.
+// Keep the ids in step with PROGRAMS in client/src/config.ts, which also has their names.
 // Each term only lists courses uoCampus actually offers then (checked for 2026-27):
 // MAT1348, for one, only runs in the winter.
 const SEQUENCES = {

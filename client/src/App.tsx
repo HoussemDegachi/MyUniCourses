@@ -19,6 +19,7 @@ import { useTheme } from "@/components/theme-provider"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Toaster } from "@/components/ui/sonner"
+import { APP_NAME } from "@/config"
 import { usePlanner } from "@/hooks/usePlanner"
 import { compareSchedules } from "@/lib/compare"
 import { findConflicts } from "@/lib/conflicts"
@@ -199,12 +200,19 @@ function Header() {
   return (
     <header className="flex shrink-0 items-center justify-between gap-4 px-4 py-3 lg:px-6">
       <div className="flex items-baseline gap-3">
-        <h1 className="text-xl font-extrabold tracking-tight">MyUniCourses</h1>
+        <h1 className="text-xl font-extrabold tracking-tight">{APP_NAME}</h1>
         <p className="hidden text-sm text-muted-foreground md:block">
         </p>
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Google's consent-screen review expects the home page to link the privacy policy. */}
+        <a
+          href="/privacy.html"
+          className="rounded-sm px-2 text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Privacy
+        </a>
         <AccountButton />
         <Button
           variant="ghost"

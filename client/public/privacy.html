@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy policy · myUni.Courses</title>
+    <meta name="description" content="What myUni.Courses collects, why, and how to remove it." />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗓️</text></svg>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&display=swap" rel="stylesheet" />
+    <script>
+      // Match the theme picked in the app (same storage key), falling back to the system setting.
+      try {
+        const saved = localStorage.getItem("planner-theme")
+        const dark = saved === "dark" || ((!saved || saved === "system") && matchMedia("(prefers-color-scheme: dark)").matches)
+        if (dark) document.documentElement.classList.add("dark")
+      } catch {}
+    </script>
+    <style>
+      :root {
+        --paper: #f6f7f9;
+        --card: #ffffff;
+        --ink: #1c2331;
+        --muted: #5b6474;
+        --rule: #dde2e9;
+        --garnet: #8c1d2f;
+        --hl: #ffe45c;
+      }
+      :root.dark {
+        --paper: #121722;
+        --card: #182030;
+        --ink: #e7ebf2;
+        --muted: #9aa4b5;
+        --rule: #2a3242;
+        --garnet: #e0566b;
+        --hl: #d9bf2e;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font: 16px/1.65 "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      main { max-width: 720px; margin: 0 auto; padding: 40px 16px 72px; }
+      header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
+      .brand { font-weight: 800; font-size: 20px; letter-spacing: -0.02em; color: var(--ink); text-decoration: none; }
+      a { color: var(--garnet); }
+      h1 { font-size: 32px; line-height: 1.2; letter-spacing: -0.02em; margin: 0 0 6px; }
+      h2 { font-size: 19px; margin: 36px 0 8px; }
+      .updated { color: var(--muted); margin: 0 0 24px; }
+      .summary {
+        background: var(--card);
+        border: 1px solid var(--rule);
+        border-left: 4px solid var(--hl);
+        border-radius: 8px;
+        padding: 16px 20px;
+      }
+      .summary ul { margin: 8px 0 0; padding-left: 20px; }
+      ul { padding-left: 22px; }
+      li { margin: 4px 0; }
+      .note { color: var(--muted); font-size: 14px; }
+      footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <a class="brand" href="/">myUni.Courses</a>
+        <a href="/">Back to the planner</a>
+      </header>
+
+      <h1>Privacy policy</h1>
+      <p class="updated">Last updated September 26, 2026</p>
+
+      <p>
+        myUni.Courses helps university students build class schedules around the professors, times and days they want.
+        It was built at Hack the Hill III. This page explains what information it uses, why, and how to remove it.
+      </p>
+
+      <div class="summary">
+        <strong>The short version</strong>
+        <ul>
+          <li>You can use the planner without an account.</li>
+          <li>We don't keep a database of users, sell data, show ads or use tracking.</li>
+          <li>If you connect Google Calendar, we only create a new calendar for your classes. We never read, change or delete your other calendars or events.</li>
+        </ul>
+      </div>
+
+      <h2>What we use, and why</h2>
+
+      <p><strong>Your courses and preferences.</strong>
+        The courses you pick, your settings, and anything you type into the preferences box are sent to our server to build your
+        schedules. The preferences text is sent to Google's Gemini AI so it can turn your words into settings. Facts about the
+        finished schedules (such as class times and professor ratings) are also sent to Gemini to write the explanation. None of
+        this is linked to your identity, and what you type is not stored.</p>
+
+      <p><strong>Calendars you import.</strong>
+        If you import a calendar file, it is read in your browser. Only the day, time and title of weekly events are sent to our
+        server, so classes can avoid those times. They are not stored.</p>
+
+      <p><strong>Your account, if you sign in.</strong>
+        Sign-in is handled by Auth0 using your Google account. Auth0 receives your name, email address and profile picture, and we
+        use them only to show that you're signed in and to add your schedule to your calendar.</p>
+
+      <p><strong>Google Calendar, if you allow it.</strong>
+        When you sign in, Google asks whether myUni.Courses may access your calendar. Auth0 keeps the access Google grants, and our
+        server uses it only when you press <em>Add to Google Calendar</em>. It then creates one new calendar named after the term
+        and adds your classes to it. We don't read, change or delete any other calendar or event, and the access is never sent to
+        your browser.</p>
+
+      <p><strong>Your device.</strong>
+        Your browser stores your light or dark theme choice and, if you sign in, your sign-in session. Nothing else.</p>
+
+      <h2>Google user data</h2>
+      <p>
+        myUni.Courses's use and transfer of information received from Google APIs adheres to the
+        <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
+        including the Limited Use requirements. Google user data is used only to add your schedule to your calendar, is not
+        transferred to anyone else, is not used for advertising, and is not read by people.
+      </p>
+
+      <h2>Services we rely on</h2>
+      <ul>
+        <li><strong>Auth0</strong> for sign-in and keeping your Google Calendar access.</li>
+        <li><strong>Google</strong> for sign-in, Google Calendar, and the Gemini AI.
+          <span class="note">On Gemini's free tier, Google may use submitted text to improve its products, so please don't type
+          personal information into the preferences box.</span></li>
+        <li><strong>Rate My Professors</strong> for public professor ratings. We send only professor names, never anything about you.</li>
+        <li><strong>The university's public class listings</strong> for course sections and times.</li>
+      </ul>
+
+      <h2>What we keep</h2>
+      <p>
+        We keep temporary copies of public course listings, professor ratings and AI-written schedule explanations so the site stays
+        fast. They contain no personal information. Auth0 keeps your account until you ask us to delete it.
+      </p>
+
+      <h2>Your choices</h2>
+      <ul>
+        <li>Remove myUni.Courses's access to your Google account at
+          <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+        <li>Delete the calendar we created from Google Calendar at any time. Removing it deletes every class we added.</li>
+        <li>Ask us to delete your account, or ask anything about this policy, by emailing
+          <a href="mailto:privacy@myuni.courses">privacy@myuni.courses</a>.</li>
+      </ul>
+
+      <h2>Changes</h2>
+      <p>If this policy changes, we'll update this page and the date at the top.</p>
+
+      <footer>myUni.Courses · A student project from Hack the Hill III</footer>
+    </main>
+  </body>
+</html>

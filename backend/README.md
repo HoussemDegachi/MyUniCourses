@@ -34,7 +34,7 @@ off and the sliders still work. Without Auth0, sign-in hides itself. With
 | GET | `/api/calendar/status` | whether calendar push is available |
 | POST | `/api/calendar/push` | writes the schedule to Google Calendar (needs sign-in) |
 
-Shapes live in `planner/src/types.ts`. Times are 24h strings like `"13:30"`, days
+Shapes live in `client/src/types.ts`. Times are 24h strings like `"13:30"`, days
 are `"MON"` to `"SAT"`.
 
 ## How the pieces fit

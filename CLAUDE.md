@@ -10,8 +10,8 @@ describes what they want in plain English, and gets the best conflict-free sched
 plus a genuinely different alternative, ranked against those preferences, each with
 professor ratings and a short write-up of the trade-offs.
 
-Name: **uschedule.ai** (renamed from the working name Profound). It is set in
-`planner/src/config.ts` (`APP_NAME`), `planner/index.html` (`<title>`), and
+Name: **myUni.Courses**, which is also the domain (earlier names: Profound, uschedule.ai). It is set in
+`client/src/config.ts` (`APP_NAME`), `client/index.html` (`<title>`), and
 `APP_NAME` in `backend/.env`, which names the Google Calendar it creates.
 The Auth0 API identifier `https://profound.api` still carries the old name on
 purpose: it is registered in the Auth0 tenant, and changing it breaks sign-in.
@@ -20,7 +20,7 @@ purpose: it is registered in the Auth0 tenant, and changing it breaks sign-in.
 
 ```
 backend/        Node + Express API. Scraper, generator, Gemini, Auth0, Calendar.
-planner/        React + TypeScript + Vite frontend.
+client/         React + TypeScript + Vite frontend.
 SETUP.md        Full setup: running it, Gemini key, Auth0, Google Calendar.
 docs/           Background that does not belong in code comments.
 ```
@@ -33,13 +33,13 @@ frontend won't start.
 
 ```
 cd backend  && npm install && cp .env.example .env       && npm run dev   # :8080
-cd planner  && npm install && cp .env.example .env.local && npm run dev   # :5173
+cd client   && npm install && cp .env.example .env.local && npm run dev   # :5173
 ```
 
 `USE_SAMPLE_DATA=true` in `backend/.env` skips uoCampus entirely and serves
 built-in data. This is the demo-day safety switch.
 
-`VITE_USE_MOCKS=true` in `planner/.env.local` runs the frontend with no backend
+`VITE_USE_MOCKS=true` in `client/.env.local` runs the frontend with no backend
 at all.
 
 ## Commands
@@ -49,10 +49,10 @@ at all.
 | backend | `npm run dev` | server with `--watch` |
 | backend | `node --check <file>` | syntax check (there is no test suite) |
 | backend | `node scripts/build-course-list.js <term>` | rebuild `data/courses-<term>.json`, once per new term |
-| planner | `npm run dev` | Vite dev server |
-| planner | `npm run build` | typecheck then build |
-| planner | `npx tsc -b` | typecheck only |
-| planner | `npm run lint` | oxlint |
+| client | `npm run dev` | Vite dev server |
+| client | `npm run build` | typecheck then build |
+| client | `npx tsc -b` | typecheck only |
+| client | `npm run lint` | oxlint |
 
 There are no automated tests. Verify by running both servers and clicking
 through: add courses, build, hover a class, swap a DGD, export .ics.
@@ -81,8 +81,8 @@ index.js (routes) --- src/gemini.js      callGemini, write-ups, prof summaries
                                          Sections, ratings and Gemini calls are the shared ones.
 ```
 
-The frontend only ever talks to `planner/src/api/client.ts`. All state lives in
-`planner/src/hooks/usePlanner.ts`. The frontend does not call `/api/schedules/ai`.
+The frontend only ever talks to `client/src/api/client.ts`. All state lives in
+`client/src/hooks/usePlanner.ts`. The frontend does not call `/api/schedules/ai`.
 
 Course search never scrapes. uoCampus has no "list every course" page and a
 whole-subject search stops at 300 sections (MAT, PHY, ADM and others go over), so
@@ -91,7 +91,7 @@ Sections are scraped one course at a time, which stays under the cap.
 
 ## Rules that matter
 
-**Types are the contract.** `planner/src/types.ts` defines every shape crossing
+**Types are the contract.** `client/src/types.ts` defines every shape crossing
 the wire. Change it and the backend at the same time, or things break silently.
 Times are 24h strings (`"13:30"`). Days are `"MON"` to `"SUN"`.
 
@@ -106,7 +106,7 @@ and LAB Z13, and every lecture group takes one of each from those. So an option 
 lecture group plus one unit of each component only the shared groups offer.
 
 **Two generators, kept in step.** `backend/src/generator.js` is authoritative.
-`planner/src/lib/generator.ts` is a port that powers mock mode and acts as a
+`client/src/lib/generator.ts` is a port that powers mock mode and acts as a
 fallback if the backend dies mid-demo. Change one, change the other.
 
 **Gemini picks, the code checks.** Build sends the student's prompt, sliders, days off
@@ -137,7 +137,7 @@ an undocumented endpoint. Courses cache 1h, terms 12h, professors 7 days, to
 memory and to `.cache/`. Do not add a code path that scrapes per request.
 
 **Never pair a real professor's name with invented data.** Names in
-`backend/src/sample.js` and `planner/src/api/mockData.ts` are fictional on
+`backend/src/sample.js` and `client/src/api/mockData.ts` are fictional on
 purpose.
 
 **Degrade, do not crash.** No Gemini key means the prompt box disables itself and

@@ -28,7 +28,7 @@ The code for all of this is written and needs no changes.
 
 ## 3. Small things worth doing
 
-**A real favicon.** Still the default emoji. The title is set to uschedule.ai.
+**A real favicon.** Still the default emoji. The title is set to myUni.Courses.
 
 **Register the domain.** GoDaddy Registry prize, five minutes.
 

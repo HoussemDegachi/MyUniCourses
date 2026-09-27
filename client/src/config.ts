@@ -1,5 +1,5 @@
 // The product name, used in the header and exports. Also in index.html and backend/.env.
-export const APP_NAME = "uschedule.ai"
+export const APP_NAME = "myUni.Courses"
 
 // Sample data lets the UI run before the backend is up.
 // Set VITE_USE_MOCKS=false in .env.local to use the real API.

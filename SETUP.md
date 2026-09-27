@@ -25,7 +25,7 @@ npm run dev
 **Frontend**
 
 ```
-cd planner
+cd client
 npm install
 cp .env.example .env.local
 npm run dev
@@ -106,7 +106,7 @@ AUTH0_AUDIENCE=https://profound.api
    Allowed Callback URLs, Allowed Logout URLs, Allowed Web Origins.
 4. Save.
 
-Put it in `planner/.env.local`:
+Put it in `client/.env.local`:
 
 ```
 VITE_AUTH0_DOMAIN=something.us.auth0.com
@@ -160,7 +160,7 @@ button appears.
 
 Sign in with Google. Google should ask for calendar permission during that same
 screen. Build a schedule, press Add to Google Calendar, then check
-calendar.google.com. There should be a new calendar named `uschedule.ai: 2026 Fall Term`
+calendar.google.com. There should be a new calendar named `myUni.Courses: 2026 Fall Term`
 holding one weekly repeating event per class.
 
 ### When it breaks
@@ -188,7 +188,7 @@ holding one weekly repeating event per class.
 
 ## 5. Deploying (only if you have spare time)
 
-Frontend: `npm run build` in `planner`, upload `dist` anywhere static.
+Frontend: `npm run build` in `client`, upload `dist` anywhere static.
 Backend: any Node host. Set every variable from `.env.example`.
 
 Then add the deployed URLs to Auth0's callback, logout and web origin lists (comma

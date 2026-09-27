@@ -19,13 +19,13 @@ short write-up of what it gives you and what it costs you.
 ## Getting started
 
 Read `SETUP.md`. The short version: `npm install` and `npm run dev` in both
-`backend` and `planner`. No accounts or keys are needed to see it work.
+`backend` and `client`. No accounts or keys are needed to see it work.
 
 ## Layout
 
 ```
 backend/      Express API, uoCampus scraper, generator, Gemini, Auth0, Calendar
-planner/      React frontend
+client/      React frontend
 SETUP.md      Full setup, including Gemini, Auth0 and Google Calendar
 docs/         API reference, scraper notes, decisions, hackathon context
 CLAUDE.md     Guidance for Claude Code working in this repo

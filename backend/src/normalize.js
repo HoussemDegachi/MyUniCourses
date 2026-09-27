@@ -1,5 +1,5 @@
 // Turns the scraper's raw section objects into the shape the frontend expects.
-// See planner/src/types.ts. Any change here must be mirrored there.
+// See client/src/types.ts. Any change here must be mirrored there.
 
 import { prerequisitesFor } from "./prerequisites.js";
 

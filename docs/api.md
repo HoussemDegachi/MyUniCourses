@@ -4,7 +4,7 @@ Base URL `http://localhost:8080`. JSON in, JSON out. Errors are
 `{ "error": "...", "code": "..." }` with a matching HTTP status; `code` only
 appears where the frontend branches on it.
 
-Every shape below is defined in `planner/src/types.ts`. That file is the
+Every shape below is defined in `client/src/types.ts`. That file is the
 contract: change it and the backend together.
 
 Times are 24h strings, `"08:30"`. Days are `"MON"` to `"SUN"`. Status is
@@ -176,7 +176,7 @@ Creates a new calendar named for the term and adds one weekly recurring event pe
 class.
 
 ```json
-{ "calendarId": "...", "calendarName": "uschedule.ai: 2026 Fall Term", "created": 9, "failed": [] }
+{ "calendarId": "...", "calendarName": "myUni.Courses: 2026 Fall Term", "created": 9, "failed": [] }
 ```
 
 | Status | `code` | Means |
