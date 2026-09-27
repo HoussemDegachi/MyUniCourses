@@ -206,6 +206,13 @@ function Header() {
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Google's consent-screen review expects the home page to link the privacy policy. */}
+        <a
+          href="/privacy.html"
+          className="rounded-sm px-2 text-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Privacy
+        </a>
         <AccountButton />
         <Button
           variant="ghost"
