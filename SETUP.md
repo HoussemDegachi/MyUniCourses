@@ -148,7 +148,7 @@ button appears.
 
 Sign in with Google. Google should ask for calendar permission during that same
 screen. Build a schedule, press Add to Google Calendar, then check
-calendar.google.com. There should be a new calendar named `Profound: 2026 Fall Term`
+calendar.google.com. There should be a new calendar named `uschedule.ai: 2026 Fall Term`
 holding one weekly repeating event per class.
 
 ### When it breaks

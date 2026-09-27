@@ -144,7 +144,7 @@ Creates a new calendar named for the term and adds one weekly recurring event pe
 class.
 
 ```json
-{ "calendarId": "...", "calendarName": "Profound: 2026 Fall Term", "created": 9, "failed": [] }
+{ "calendarId": "...", "calendarName": "uschedule.ai: 2026 Fall Term", "created": 9, "failed": [] }
 ```
 
 | Status | `code` | Means |

@@ -55,5 +55,4 @@ tabs. The garnet accent is a quiet nod to uOttawa. Dark mode is supported.
 
 ## Before the demo
 
-- `APP_NAME` in `src/config.ts` and the `<title>` in `index.html` still say Profound
 - Prof names in `mockData.ts` are invented. Never pair a real prof with a fake rating.

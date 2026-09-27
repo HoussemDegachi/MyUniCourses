@@ -1,5 +1,5 @@
-// Change the name here once the team picks one. It's used in the header and exports.
-export const APP_NAME = "Profound"
+// The product name, used in the header and exports. Also in index.html and backend/.env.
+export const APP_NAME = "uschedule.ai"
 
 // Sample data lets the UI run before the backend is up.
 // Set VITE_USE_MOCKS=false in .env.local to use the real API.
