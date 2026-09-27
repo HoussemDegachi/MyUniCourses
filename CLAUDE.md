@@ -10,7 +10,7 @@ describes what they want in plain English, and gets five conflict-free schedules
 ranked against those preferences, each with professor ratings and a short
 write-up of the trade-offs.
 
-Name: **uschedule.ai** (renamed from the working name Profound). It is set in
+Name: **myUni.Courses**, which is also the domain (earlier names: Profound, uschedule.ai). It is set in
 `planner/src/config.ts` (`APP_NAME`), `planner/index.html` (`<title>`), and
 `APP_NAME` in `backend/.env`, which names the Google Calendar it creates.
 The Auth0 API identifier `https://profound.api` still carries the old name on

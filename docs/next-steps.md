@@ -40,7 +40,7 @@ Adding a few more programs is copy-paste and makes the demo feel less narrow.
 whole term with no `EXDATE` for reading week or holidays. Honest and small to
 fix if there is time.
 
-**A real favicon.** Still the default emoji. The title is set to uschedule.ai.
+**A real favicon.** Still the default emoji. The title is set to myUni.Courses.
 
 **Register the domain.** GoDaddy Registry prize, five minutes.
 

@@ -78,8 +78,10 @@ prototype.
 
 ## Naming
 
-Final name: uschedule.ai. Short, says what it does, and "u" nods to university
-without using uOttawa's trademarks.
+Final name: myUni.Courses, which is also the domain. "myUni" makes it about the
+student's own university, which fits expanding beyond uOttawa, and it avoids the
+university's trademarks. `.courses` is a GoDaddy Registry extension. The name went
+Profound, then uschedule.ai, then myUni.Courses.
 
 Earlier working name Profound: "prof" plus "found", and it points at the professor
 ratings that make this different from existing tools. Alternatives considered:

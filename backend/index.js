@@ -20,7 +20,7 @@ import { sampleProf } from "./src/sample.js";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-const APP_NAME = process.env.APP_NAME || "uschedule.ai";
+const APP_NAME = process.env.APP_NAME || "myUni.Courses";
 const PROF_TTL = 7 * 24 * 60 * 60 * 1000;
 // Most courses a student can plan at once. Matches MAX_COURSES in planner/src/config.ts.
 const MAX_COURSES = 6;
