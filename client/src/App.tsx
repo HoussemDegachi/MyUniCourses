@@ -23,6 +23,7 @@ import { usePlanner } from "@/hooks/usePlanner"
 import { compareSchedules } from "@/lib/compare"
 import { findConflicts } from "@/lib/conflicts"
 import type { Section } from "@/types"
+import { Analytics } from "@vercel/analytics/react"
 
 // The same empty list every render, so the memos below only rerun when something changed.
 const NO_SECTIONS: Section[] = []
@@ -43,6 +44,7 @@ export default function App() {
   const allSections = useMemo(() => p.schedules.flatMap((s) => s.sections), [p.schedules])
 
   return (
+    <>
     <MotionConfig reducedMotion="user">
       {/* On a laptop the page never scrolls: only the controls column does, and the
           schedule fills the rest. On a phone there isn't room for that, so the page
@@ -187,6 +189,8 @@ export default function App() {
 
       <Toaster position="bottom-center" />
     </MotionConfig>
+    <Analytics />
+    </>
   )
 }
 
